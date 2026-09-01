@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Recursos/PauseVolumen.png</file>
+        <file>Recursos/PlayVolumen.png</file>
+        <file>Recursos/UsernamePantalla.png</file>
+        <file>Recursos/UsernameSalir.png</file>
+        <file>Recursos/UsernameConfirmar.png</file>
+        <file>Recursos/SnakeInicio.png</file>
+        <file>Recursos/ExitButton.png</file>
+        <file>Recursos/PlayButton.png</file>
+        <file>Recursos/Pixellari.ttf</file>
+        <file>Recursos/MenuInstrucciones.png</file>
+        <file>Recursos/MenuJugar.png</file>
+        <file>Recursos/MenuOpciones.png</file>
+        <file>Recursos/MenuPantalla.png</file>
+        <file>Recursos/MenuRecords.png</file>
+    </qresource>
+</RCC>
