@@ -41,14 +41,12 @@ void MainWindow::crearPaginaInicio()
     paginaInicio = new QWidget();
     paginaInicio->setFixedSize(800, 700);
 
-
-    // --- Fondo ---
     QLabel *fondo = new QLabel(paginaInicio);
     fondo->setPixmap(QPixmap(":/Recursos/SnakeInicio.png"));
     fondo->setGeometry(0, 0, 800, 700);
     fondo->lower();
 
-    // --- Botón Play ---
+
     QPushButton *btnJugar = new QPushButton(paginaInicio);
     btnJugar->setIcon(QIcon(":/Recursos/PlayButton.png"));
     btnJugar->setIconSize(QSize(294, 124));
@@ -56,7 +54,6 @@ void MainWindow::crearPaginaInicio()
     btnJugar->setFlat(true);
     btnJugar->setStyleSheet("border: none; background: transparent;");
 
-    // --- Botón Exit ---
     QPushButton *btnSalir = new QPushButton(paginaInicio);
     btnSalir->setIcon(QIcon(":/Recursos/ExitButton.png"));
     btnSalir->setIconSize(QSize(294, 124));
@@ -92,13 +89,13 @@ void MainWindow::crearPaginaUsername()
 {
     paginaUsername = new QWidget();
 
-    // --- Fondo ---
+
     QLabel *fondo = new QLabel(paginaUsername);
     fondo->setPixmap(QPixmap(":/Recursos/UsernamePantalla.png"));
     fondo->setGeometry(0, 0, 800, 700);
     fondo->lower();
 
-    // --- Campo de texto ---
+
     campoNombre = new QLineEdit(paginaUsername);
     campoNombre->setGeometry(98, 318, 599, 93);
     campoNombre->setAlignment(Qt::AlignCenter);
@@ -114,7 +111,7 @@ void MainWindow::crearPaginaUsername()
                                    "}"
                                    ).arg(familiaFuente));
 
-    // --- Botón Salir (vuelve al menú) ---
+
     QPushButton *btnSalir = new QPushButton(paginaUsername);
     btnSalir->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
     btnSalir->setIconSize(QSize(278, 70));
@@ -126,7 +123,7 @@ void MainWindow::crearPaginaUsername()
         stack->setCurrentWidget(paginaInicio);
     });
 
-    // --- Botón Confirmar ---
+
     QPushButton *btnConfirmar = new QPushButton(paginaUsername);
     btnConfirmar->setIcon(QIcon(":/Recursos/UsernameConfirmar.png"));
     btnConfirmar->setIconSize(QSize(278, 70));
@@ -137,7 +134,7 @@ void MainWindow::crearPaginaUsername()
     connect(btnConfirmar, &QPushButton::clicked, this, &MainWindow::validarNombre);
     connect(campoNombre, &QLineEdit::returnPressed, this, &MainWindow::validarNombre); // Enter también confirma
 
-    // --- Botón Volumen (igual que en el menú) ---
+
     QPushButton *btnVolumen = new QPushButton(paginaUsername);
     btnVolumen->setCheckable(true);
     btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
@@ -158,7 +155,7 @@ void MainWindow::validarNombre()
     QString nombre = campoNombre->text().trimmed();
 
     if (nombre.isEmpty()) {
-        // Feedback visual: borde y texto en rojo
+
         campoNombre->setStyleSheet(QString(
                                        "QLineEdit {"
                                        "  background-color: rgb(15, 58, 13);"
@@ -172,8 +169,6 @@ void MainWindow::validarNombre()
         return;
     }
 
-    // Nombre válido: aquí más adelante llamamos a GestorArchivos
-    // para revisar si ya existe y cargar sus récords/skins.
     qDebug() << "Nombre confirmado:" << nombre;
 
    stack->setCurrentWidget(paginaMenuPrincipal);
@@ -183,17 +178,16 @@ void MainWindow::crearPaginaMenuPrincipal()
 {
     paginaMenuPrincipal = new QWidget();
 
-    // --- Fondo ---
     QLabel *fondo = new QLabel(paginaMenuPrincipal);
     fondo->setPixmap(QPixmap(":/Recursos/MenuPantalla.png"));
     fondo->setGeometry(0, 0, 800, 700);
     fondo->lower();
 
-    // --- Botón Jugar (lleva a ingreso de nombre) ---
+
     QPushButton *btnJugar = new QPushButton(paginaMenuPrincipal);
     btnJugar->setIcon(QIcon(":/Recursos/MenuJugar.png"));
     btnJugar->setIconSize(QSize(278, 70));
-    btnJugar->setGeometry(94, 302, 278, 70);
+    btnJugar->setGeometry(92, 302, 278, 70);
     btnJugar->setFlat(true);
     btnJugar->setStyleSheet("border: none; background: transparent;");
 
@@ -201,11 +195,11 @@ void MainWindow::crearPaginaMenuPrincipal()
         stack->setCurrentWidget(paginaUsername);
     });
 
-    // --- Botón Instrucciones ---
+
     QPushButton *btnInstrucciones = new QPushButton(paginaMenuPrincipal);
     btnInstrucciones->setIcon(QIcon(":/Recursos/MenuInstrucciones.png"));
     btnInstrucciones->setIconSize(QSize(278, 70));
-    btnInstrucciones->setGeometry(425, 302, 278, 70);
+    btnInstrucciones->setGeometry(428, 302, 278, 70);
     btnInstrucciones->setFlat(true);
     btnInstrucciones->setStyleSheet("border: none; background: transparent;");
 
@@ -213,7 +207,7 @@ void MainWindow::crearPaginaMenuPrincipal()
         qDebug() << "Botón Instrucciones presionado (pantalla pendiente)";
     });
 
-    // --- Botón Récords ---
+
     QPushButton *btnRecords = new QPushButton(paginaMenuPrincipal);
     btnRecords->setIcon(QIcon(":/Recursos/MenuRecords.png"));
     btnRecords->setIconSize(QSize(278, 70));
@@ -225,7 +219,6 @@ void MainWindow::crearPaginaMenuPrincipal()
         qDebug() << "Botón Récords presionado (pantalla pendiente)";
     });
 
-    // --- Botón Opciones ---
     QPushButton *btnOpciones = new QPushButton(paginaMenuPrincipal);
     btnOpciones->setIcon(QIcon(":/Recursos/MenuOpciones.png"));
     btnOpciones->setIconSize(QSize(278, 70));
@@ -237,11 +230,22 @@ void MainWindow::crearPaginaMenuPrincipal()
         qDebug() << "Botón Opciones presionado (pantalla pendiente)";
     });
 
-    // --- Botón Salir ---
+    QPushButton *btnAlbum = new QPushButton(paginaMenuPrincipal);
+    btnAlbum->setIcon(QIcon(":/Recursos/MenuAlbum.png"));
+    btnAlbum->setIconSize(QSize(278, 70));
+    btnAlbum->setGeometry(92, 480, 278, 70);
+    btnAlbum->setFlat(true);
+    btnAlbum->setStyleSheet("border: none; background: transparent;");
+
+    connect(btnAlbum, &QPushButton::clicked, this, [](){
+        qDebug() << "Botón Album presionado (pantalla pendiente)";
+    });
+
+
     QPushButton *btnSalir = new QPushButton(paginaMenuPrincipal);
     btnSalir->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
     btnSalir->setIconSize(QSize(278, 70));
-    btnSalir->setGeometry(268, 480, 278, 70);
+    btnSalir->setGeometry(428, 480, 278, 70);
     btnSalir->setFlat(true);
     btnSalir->setStyleSheet("border: none; background: transparent;");
 
@@ -249,7 +253,6 @@ void MainWindow::crearPaginaMenuPrincipal()
         stack->setCurrentWidget(paginaUsername);
     });
 
-    // --- Botón Volumen ---
     QPushButton *btnVolumen = new QPushButton(paginaMenuPrincipal);
     btnVolumen->setCheckable(true);
     btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
@@ -270,5 +273,5 @@ void MainWindow::crearPaginaMenuPrincipal()
 
 MainWindow::~MainWindow()
 {
-    // Qt libera automáticamente los widgets hijos del padre (this)
+
 }

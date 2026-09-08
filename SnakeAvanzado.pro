@@ -7,11 +7,21 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    comida.cpp \
+    gestorarchivos.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    nodo.cpp \
+    serpiente.cpp \
+    tablero.cpp
 
 HEADERS += \
-    mainwindow.h
+    comida.h \
+    gestorarchivos.h \
+    mainwindow.h \
+    nodo.h \
+    serpiente.h \
+    tablero.h
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

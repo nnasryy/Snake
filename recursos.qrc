@@ -14,5 +14,6 @@
         <file>Recursos/MenuOpciones.png</file>
         <file>Recursos/MenuPantalla.png</file>
         <file>Recursos/MenuRecords.png</file>
+        <file>Recursos/MenuAlbum.png</file>
     </qresource>
 </RCC>
