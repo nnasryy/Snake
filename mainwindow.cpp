@@ -6,6 +6,8 @@
 #include <QDirIterator>
 #include <QFontDatabase>
 
+using namespace std;
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -22,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug() << "No se pudo cargar Pixellari, usando fuente por defecto";
         familiaFuente = "Arial";
     }
+//porque aqui es minuscula?
+    gestorArchivos = new GestorArchivos("records.txt");
 
     stack = new QStackedWidget(this);
     setCentralWidget(stack);
@@ -152,10 +156,9 @@ void MainWindow::crearPaginaUsername()
 
 void MainWindow::validarNombre()
 {
-    QString nombre = campoNombre->text().trimmed();
+    QString nombreQt = campoNombre->text().trimmed();
 
-    if (nombre.isEmpty()) {
-
+    if (nombreQt.isEmpty()) {
         campoNombre->setStyleSheet(QString(
                                        "QLineEdit {"
                                        "  background-color: rgb(15, 58, 13);"
@@ -169,9 +172,25 @@ void MainWindow::validarNombre()
         return;
     }
 
-    qDebug() << "Nombre confirmado:" << nombre;
+    string nombre = nombreQt.toStdString(); // QString -> std::string, para GestorArchivos
 
-   stack->setCurrentWidget(paginaMenuPrincipal);
+    // READ: ¿este nombre ya existe?
+    if (gestorArchivos->buscarJugadorPorNombre(nombre, jugadorActual)) {
+        qDebug() << "Bienvenido de vuelta:" << QString::fromStdString(jugadorActual.nombre)
+        << "| Puntaje máximo:" << jugadorActual.puntajeMaximo
+        << "| Nivel alcanzado:" << jugadorActual.nivelMaximoAlcanzado;
+    } else {
+        // CREATE: jugador nuevo, con valores en cero
+        jugadorActual.nombre = nombre;
+        jugadorActual.puntajeMaximo = 0;
+        jugadorActual.tiempoMaximo = 0;
+        jugadorActual.nivelMaximoAlcanzado = 1; // arranca con Nivel 1 desbloqueado
+
+        gestorArchivos->crearJugador(jugadorActual);
+        qDebug() << "Nuevo jugador creado:" << QString::fromStdString(jugadorActual.nombre);
+    }
+
+    stack->setCurrentWidget(paginaMenuPrincipal);
 }
 
 void MainWindow::crearPaginaMenuPrincipal()
@@ -268,10 +287,220 @@ void MainWindow::crearPaginaMenuPrincipal()
     stack->addWidget(paginaMenuPrincipal);
 }
 
+void MainWindow::crearPaginaJuego()
+{
+    paginaJuego = new QWidget();
 
+    // --- Escena y vista ---
+    escenaJuego = new QGraphicsScene(0, 0, 800, 700, this);
+    vistaJuego = new QGraphicsView(escenaJuego, paginaJuego);
+    vistaJuego->setGeometry(0, 0, 800, 700);
+    vistaJuego->setStyleSheet("border: none;");
+    vistaJuego->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    vistaJuego->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
+    // --- HUD (encima de la vista, como widgets normales) ---
+    QLabel *lblTituloPuntos = new QLabel("PUNTOS:", paginaJuego);
+    lblTituloPuntos->setGeometry(145, 56, 150, 40);
+    lblTituloPuntos->setStyleSheet(QString(
+                                       "color: rgb(143, 208, 53); font-family: '%1'; font-size: 27px;"
+                                       ).arg(familiaFuente));
+
+    lblValorPuntos = new QLabel("0", paginaJuego);
+    lblValorPuntos->setGeometry(170, 56, 100, 40);
+    lblValorPuntos->setStyleSheet(QString(
+                                      "color: rgb(143, 208, 53); font-family: '%1'; font-size: 27px;"
+                                      ).arg(familiaFuente));
+
+    lblValorVidas = new QLabel("3", paginaJuego);
+    lblValorVidas->setGeometry(311, 55, 60, 40);
+    lblValorVidas->setStyleSheet(QString(
+                                     "color: rgb(143, 208, 53); font-family: '%1'; font-size: 31px;"
+                                     ).arg(familiaFuente));
+
+    lblValorTiempo = new QLabel("00:00", paginaJuego);
+    lblValorTiempo->setGeometry(639, 59, 100, 40);
+    lblValorTiempo->setStyleSheet(QString(
+                                      "color: rgb(143, 208, 53); font-family: '%1'; font-size: 26px;"
+                                      ).arg(familiaFuente));
+
+    QPushButton *btnPausa = new QPushButton(paginaJuego);
+    btnPausa->setIcon(QIcon(":/Recursos/PauseVolumen.png")); // ícono de pausa, no el de volumen
+    btnPausa->setIconSize(QSize(40, 40));
+    btnPausa->setGeometry(735, 53, 40, 40);
+    btnPausa->setFlat(true);
+    btnPausa->setStyleSheet("border: none; background: transparent;");
+    connect(btnPausa, &QPushButton::clicked, this, &MainWindow::mostrarPausa);
+
+    // --- Overlay de pausa (oculto por defecto) ---
+    overlayPausa = new QWidget(paginaJuego);
+    overlayPausa->setGeometry(200, 250, 400, 200);
+    overlayPausa->setStyleSheet("background-color: rgba(15, 58, 13, 230); border: 5px solid rgb(143, 208, 53);");
+    overlayPausa->setVisible(false);
+
+    QPushButton *btnReanudar = new QPushButton("Reanudar", overlayPausa);
+    btnReanudar->setGeometry(50, 50, 300, 50);
+    connect(btnReanudar, &QPushButton::clicked, this, &MainWindow::ocultarPausa);
+
+    QPushButton *btnVolverMenu = new QPushButton("Volver al menú", overlayPausa);
+    btnVolverMenu->setGeometry(50, 120, 300, 50);
+    connect(btnVolverMenu, &QPushButton::clicked, this, [this](){
+        timerJuego->stop();
+        ocultarPausa();
+        stack->setCurrentWidget(paginaMenuPrincipal);
+    });
+
+    // --- Timer del juego ---
+    timerJuego = new QTimer(this);
+    connect(timerJuego, &QTimer::timeout, this, &MainWindow::actualizarJuego);
+
+    stack->addWidget(paginaJuego);
+}
+
+void MainWindow::iniciarNivel1()
+{
+    // --- Configurar datos del nivel ---
+    origenXCuadricula = 49;
+    origenYCuadricula = 115;
+    tamanoCeldaActual = 50;
+    metaFrutasNivel = 10;
+    puntosActuales = 0;
+    segundosRestantes = 0;
+
+    tableroJuego.configurarNivel(14, 10, 50); // sin muros, Nivel 1 es infinito
+
+    serpienteJuego.inicializar(3, 5); // posición inicial dentro de la matriz 14x10
+    comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
+
+    // --- Limpiar la escena de cualquier partida anterior ---
+    escenaJuego->clear();
+
+    // --- Fondo del nivel ---
+    QGraphicsPixmapItem *fondo = escenaJuego->addPixmap(QPixmap(":/Recursos/nivel1background.png"));
+    fondo->setPos(0, 0);
+    fondo->setZValue(-1);
+
+    // --- Comida ---
+    itemComida = escenaJuego->addPixmap(QPixmap(":/Recursos/rana.png")); // ajusta el nombre real
+    itemComida->setPos(
+        origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual,
+        origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual
+        );
+
+    // --- Serpiente: arrancamos con arreglo dinámico vacío, se llena en redibujarSerpiente() ---
+    segmentosVisuales = nullptr;
+    cantidadSegmentosVisuales = 0;
+    redibujarSerpiente();
+
+    timerJuego->start(150); // 150ms, velocidad constante del Nivel 1
+    vistaJuego->setFocus(); // para que capture el teclado de inmediato
+
+    stack->setCurrentWidget(paginaJuego);
+}
+
+void MainWindow::redibujarSerpiente()
+{
+    // Liberamos los sprites del tick anterior
+    if (segmentosVisuales != nullptr) {
+        for (int i = 0; i < cantidadSegmentosVisuales; i++) {
+            escenaJuego->removeItem(segmentosVisuales[i]);
+            delete segmentosVisuales[i];
+        }
+        delete[] segmentosVisuales;
+    }
+
+    int longitudActual = serpienteJuego.getLongitud();
+    segmentosVisuales = new QGraphicsPixmapItem*[longitudActual];
+    cantidadSegmentosVisuales = longitudActual;
+
+    Nodo* actual = serpienteJuego.getCabeza();
+    int indice = 0;
+
+    // Patrón de colores: cabeza, luego negro-amarillo-naranja repitiendo
+    while (actual != nullptr) {
+        QString rutaSprite;
+
+        if (indice == 0) {
+            rutaSprite = ":/Recursos/BoaHead.png";
+        } else if (actual->siguiente == nullptr) {
+            rutaSprite = ":/Recursos/BoaCola.png";
+        } else {
+            int patron = (indice - 1) % 3;
+            if (patron == 0) rutaSprite = ":/Recursos/NodoNegro.png";
+            else if (patron == 1) rutaSprite = ":/Recursos/NodoAmarillo.png";
+            else rutaSprite = ":/Recursos/NodoNaranja.png";
+        }
+
+        QGraphicsPixmapItem *sprite = escenaJuego->addPixmap(QPixmap(rutaSprite));
+        sprite->setPos(
+            origenXCuadricula + actual->x * tamanoCeldaActual,
+            origenYCuadricula + actual->y * tamanoCeldaActual
+            );
+
+        segmentosVisuales[indice] = sprite;
+        indice++;
+        actual = actual->siguiente;
+    }
+}
+
+//captura del teclado
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (stack->currentWidget() != paginaJuego) {
+        QMainWindow::keyPressEvent(event);
+        return;
+    }
+
+    switch (event->key()) {
+    case Qt::Key_Up:    case Qt::Key_W: serpienteJuego.cambiarDireccion(ARRIBA); break;
+    case Qt::Key_Down:  case Qt::Key_S: serpienteJuego.cambiarDireccion(ABAJO); break;
+    case Qt::Key_Left:  case Qt::Key_A: serpienteJuego.cambiarDireccion(IZQUIERDA); break;
+    case Qt::Key_Right: case Qt::Key_D: serpienteJuego.cambiarDireccion(DERECHA); break;
+    default: QMainWindow::keyPressEvent(event); break;
+    }
+}
+
+void MainWindow::actualizarJuego()
+{
+    serpienteJuego.mover(tableroJuego.getColumnas(), tableroJuego.getFilas(), true); // true = Nivel 1 infinito
+
+    Nodo* cabeza = serpienteJuego.getCabeza();
+
+    if (cabeza->x == comidaJuego.getX() && cabeza->y == comidaJuego.getY()) {
+        serpienteJuego.crecer();
+        puntosActuales += 10;
+        lblValorPuntos->setText(QString::number(puntosActuales));
+        comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
+
+        itemComida->setPos(
+            origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual,
+            origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual
+            );
+    }
+
+    if (serpienteJuego.chocaConsigoMisma()) {
+        timerJuego->stop();
+        qDebug() << "Game Over: chocó consigo misma";
+        // más adelante: stack->setCurrentWidget(paginaGameOver);
+    }
+
+    redibujarSerpiente();
+}
+
+void MainWindow::mostrarPausa()
+{
+    timerJuego->stop();
+    overlayPausa->setVisible(true);
+    overlayPausa->raise();
+}
+
+void MainWindow::ocultarPausa()
+{
+    overlayPausa->setVisible(false);
+    timerJuego->start();
+}
 
 MainWindow::~MainWindow()
 {
-
+    delete gestorArchivos;
 }
