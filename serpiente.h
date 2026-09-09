@@ -30,6 +30,8 @@ private:
     int longitud;
     bool creceProximoMovimiento; // controla si el próximo mover() debe agregar segmento
     bool escudoActivo;
+    Direccion getDireccion() const;
+
 };
 
 #endif // SERPIENTE_H

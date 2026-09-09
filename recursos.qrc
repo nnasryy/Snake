@@ -15,5 +15,18 @@
         <file>Recursos/MenuPantalla.png</file>
         <file>Recursos/MenuRecords.png</file>
         <file>Recursos/MenuAlbum.png</file>
+        <file>Recursos/BackgroundNiveles.png</file>
+        <file>Recursos/nivel1boton.png</file>
+        <file>Recursos/nivel2boton.png</file>
+        <file>Recursos/nivel3boton.png</file>
+        <file>Recursos/safariboton.png</file>
+        <file>Recursos/BoaHead.png</file>
+        <file>Recursos/RanaLvl1.png</file>
+        <file>Recursos/NodoAmarilloLvl1.png</file>
+        <file>Recursos/NodoNaranjaLvl1.png</file>
+        <file>Recursos/NodoNegroLvl1.png</file>
+        <file>Recursos/nivel1background.png</file>
+        <file>Recursos/Manzana.png</file>
+        <file>Recursos/BoaCola.png</file>
     </qresource>
 </RCC>

@@ -44,8 +44,24 @@ void Comida::generarNuevaPosicion(Tablero &tablero, Serpiente &serpiente)
     y = nuevaY;
 
     // 20% de probabilidad de que sea comida especial
-    int probabilidad = rand() % 100;
-    tipo = (probabilidad < 20) ? ESPECIAL : NORMAL;
+
+    tipo = NORMAL;
+}
+
+void Comida::generarNuevaPosicionForzada(Tablero &tablero, Serpiente &serpiente, TipoComida tipoForzado)
+{
+    int columnas = tablero.getColumnas();
+    int filas = tablero.getFilas();
+    int nuevaX, nuevaY;
+
+    do {
+        nuevaX = rand() % columnas;
+        nuevaY = rand() % filas;
+    } while (!posicionValida(nuevaY, nuevaX, tablero, serpiente));
+
+    x = nuevaX;
+    y = nuevaY;
+    tipo = tipoForzado;
 }
 
 int Comida::getX() const { return x; }

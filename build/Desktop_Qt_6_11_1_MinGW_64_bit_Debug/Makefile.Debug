@@ -125,18 +125,31 @@ compiler_rcc_clean:
 debug/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../../../Qt/6.11.1/mingw_64/bin/rcc.exe \
 		../../Recursos/UsernameSalir.png \
+		../../Recursos/RanaLvl1.png \
 		../../Recursos/ExitButton.png \
 		../../Recursos/MenuJugar.png \
 		../../Recursos/PlayButton.png \
+		../../Recursos/Manzana.png \
+		../../Recursos/BackgroundNiveles.png \
 		../../Recursos/MenuPantalla.png \
+		../../Recursos/nivel2boton.png \
+		../../Recursos/BoaHead.png \
+		../../Recursos/NodoNaranjaLvl1.png \
 		../../Recursos/MenuRecords.png \
 		../../Recursos/Pixellari.ttf \
+		../../Recursos/nivel1boton.png \
+		../../Recursos/nivel1background.png \
+		../../Recursos/NodoAmarilloLvl1.png \
+		../../Recursos/BoaCola.png \
 		../../Recursos/PauseVolumen.png \
 		../../Recursos/MenuInstrucciones.png \
 		../../Recursos/SnakeInicio.png \
 		../../Recursos/MenuAlbum.png \
 		../../Recursos/UsernamePantalla.png \
 		../../Recursos/MenuOpciones.png \
+		../../Recursos/safariboton.png \
+		../../Recursos/nivel3boton.png \
+		../../Recursos/NodoNegroLvl1.png \
 		../../Recursos/UsernameConfirmar.png \
 		../../Recursos/PlayVolumen.png
 	C:\Qt\6.11.1\mingw_64\bin\rcc.exe -name Recursos --no-zstd ..\..\Recursos.qrc -o debug\qrc_Recursos.cpp
@@ -366,7 +379,27 @@ debug/moc_mainwindow.cpp: ../../mainwindow.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qtextformat.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpen.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qtextoption.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QGraphicsScene \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgraphicsscene.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QGraphicsView \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgraphicsview.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpainter.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qscrollarea.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qabstractscrollarea.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QGraphicsPixmapItem \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgraphicsitem.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpainterpath.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/QTimer \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/qtimer.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/QKeyEvent \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QLabel \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qlabel.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpicture.h \
 		../../gestorarchivos.h \
+		../../tablero.h \
+		../../serpiente.h \
+		../../nodo.h \
+		../../comida.h \
 		debug/moc_predefs.h \
 		../../../../Qt/6.11.1/mingw_64/bin/moc.exe
 	C:\Qt\6.11.1\mingw_64\bin\moc.exe $(DEFINES) --include C:/Proyecto_Programacion3_C++/SnakeAvanzado/build/Desktop_Qt_6_11_1_MinGW_64_bit_Debug/debug/moc_predefs.h -IC:/Qt/6.11.1/mingw_64/mkspecs/win32-g++ -IC:/Proyecto_Programacion3_C++/SnakeAvanzado -IC:/Qt/6.11.1/mingw_64/include -IC:/Qt/6.11.1/mingw_64/include/QtWidgets -IC:/Qt/6.11.1/mingw_64/include/QtGui -IC:/Qt/6.11.1/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++ -IC:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/backward -IC:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include -IC:/Qt/Tools/mingw1310_64/lib/gcc/x86_64-w64-mingw32/13.1.0/include-fixed -IC:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include ..\..\mainwindow.h -o debug\moc_mainwindow.cpp
@@ -614,7 +647,27 @@ debug/main.o: ../../main.cpp ../../mainwindow.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qtextformat.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpen.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qtextoption.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QGraphicsScene \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgraphicsscene.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QGraphicsView \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgraphicsview.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpainter.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qscrollarea.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qabstractscrollarea.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QGraphicsPixmapItem \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgraphicsitem.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpainterpath.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/QTimer \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/qtimer.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/QKeyEvent \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QLabel \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qlabel.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpicture.h \
 		../../gestorarchivos.h \
+		../../tablero.h \
+		../../serpiente.h \
+		../../nodo.h \
+		../../comida.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QApplication \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qapplication.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debug\main.o ..\..\main.cpp
@@ -835,15 +888,32 @@ debug/mainwindow.o: ../../mainwindow.cpp ../../mainwindow.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qtextformat.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpen.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qtextoption.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QGraphicsScene \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgraphicsscene.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QGraphicsView \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgraphicsview.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpainter.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qscrollarea.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qabstractscrollarea.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QGraphicsPixmapItem \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgraphicsitem.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpainterpath.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/QTimer \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/qtimer.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/QKeyEvent \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QLabel \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qlabel.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpicture.h \
 		../../gestorarchivos.h \
+		../../tablero.h \
+		../../serpiente.h \
+		../../nodo.h \
+		../../comida.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QVBoxLayout \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qboxlayout.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qlayout.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qlayoutitem.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qgridlayout.h \
-		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QLabel \
-		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qlabel.h \
-		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpicture.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QApplication \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qapplication.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/QDebug \

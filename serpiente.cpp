@@ -149,7 +149,9 @@ void Serpiente::activarEscudo()
 {
     escudoActivo = true;
 }
-
+Direccion Serpiente::getDireccion() const {
+    return direccionActual;
+}
 bool Serpiente::consumirEscudo()
 {
     if (escudoActivo) {

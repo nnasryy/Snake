@@ -33,6 +33,8 @@ private:
     QWidget *paginaJuego;
     QGraphicsScene *escenaJuego;
     QGraphicsView *vistaJuego;
+    QTimer *timerReloj;
+    int segundosTranscurridos;
 
     QString familiaFuente;   // nombre real de la fuente Pixellari ya cargada
     QLineEdit *campoNombre;  // lo guardamos como miembro para validarlo desde el botón
@@ -40,6 +42,13 @@ private:
     Tablero tableroJuego;
     Serpiente serpienteJuego;
     Comida comidaJuego;
+
+    Comida ranaJuego;
+    QGraphicsPixmapItem *itemRana;
+    bool ranaVisible;
+    int contadorRana;
+    static const int TICKS_ESPERA_RANA = 40;   // ~6 segundos a 150ms por tick
+    static const int TICKS_DURACION_RANA = 20; // ~3 segundos visible antes de desaparecer
 
     QTimer *timerJuego;
 
@@ -50,8 +59,10 @@ private:
     QWidget *overlayPausa; // pantalla emergente de pausa
 
     int origenXCuadricula, origenYCuadricula, tamanoCeldaActual;
-    int puntosActuales, segundosRestantes;
+    int frutasComidas, segundosRestantes;
     int metaFrutasNivel;
+    int vidasRestantes;
+    static const int LONGITUD_MINIMA_SEGURA = 3; // si está en esta longitud o menos, la rana quita vida en vez de encoger
 
     QGraphicsPixmapItem **segmentosVisuales; // arreglo dinámico de sprites de la serpiente
     int cantidadSegmentosVisuales;
@@ -61,12 +72,15 @@ private:
     GestorArchivos *gestorArchivos;
     DatosJugador jugadorActual;
 
+    QWidget *paginaNiveles;
+
     void crearPaginaInicio();
     void crearPaginaUsername();
     void validarNombre();
     void crearPaginaMenuPrincipal();
-
+    void crearPaginaNiveles();
     void crearPaginaJuego();
+    void iniciarNivel(int columnas, int filas, int tamanoCelda,int metaFrutas, bool modoInfinito, QString rutaFondo, QString rutaSpriteCabeza);
     void iniciarNivel1();
     void actualizarJuego();       // se llama en cada "tick" del QTimer
     void redibujarSerpiente();    // reconstruye los sprites según la lista de Nodo

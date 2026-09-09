@@ -24,7 +24,7 @@ public:
 
     // --- READ ---
     bool buscarJugadorPorNombre(string nombre, DatosJugador &resultado);
-    std::vector<DatosJugador> obtenerTopJugadores(int cantidad); // para pantalla de Récords
+    vector<DatosJugador> obtenerTopJugadores(int cantidad); // para pantalla de Récords
 
     // --- UPDATE ---
     bool actualizarJugador(DatosJugador datosActualizados);
