@@ -10,12 +10,11 @@ Comida::Comida()
 
 bool Comida::posicionValida(int fila, int columna, Tablero &tablero, Serpiente &serpiente)
 {
-    // 1. Revisamos que no caiga sobre un muro/bloque (asumimos que 1 = pared en la matriz)
+
     if (tablero.obtenerValor(fila, columna) == 1) {
         return false;
     }
 
-    // 2. Revisamos que no caiga sobre algún segmento de la serpiente
     Nodo* actual = serpiente.getCabeza();
     while (actual != nullptr) {
         if (actual->y == fila && actual->x == columna) {
@@ -24,7 +23,7 @@ bool Comida::posicionValida(int fila, int columna, Tablero &tablero, Serpiente &
         actual = actual->siguiente;
     }
 
-    return true; // no chocó con nada, es una posición válida
+    return true;
 }
 
 void Comida::generarNuevaPosicion(Tablero &tablero, Serpiente &serpiente)
@@ -34,7 +33,7 @@ void Comida::generarNuevaPosicion(Tablero &tablero, Serpiente &serpiente)
 
     int nuevaX, nuevaY;
 
-    // Probamos posiciones al azar hasta encontrar una libre
+
     do {
         nuevaX = rand() % columnas;
         nuevaY = rand() % filas;
@@ -42,8 +41,6 @@ void Comida::generarNuevaPosicion(Tablero &tablero, Serpiente &serpiente)
 
     x = nuevaX;
     y = nuevaY;
-
-    // 20% de probabilidad de que sea comida especial
 
     tipo = NORMAL;
 }

@@ -7,7 +7,7 @@ public:
     Tablero();
     ~Tablero();
 
-    // Prepara la matriz para un nivel nuevo (libera la anterior si existía)
+
     void configurarNivel(int nuevasColumnas, int nuevasFilas, int nuevoTamanoCelda);
 
     int obtenerValor(int fila, int columna) const;
@@ -22,12 +22,12 @@ public:
     void generarMurosPerimetro();
 
 private:
-    int **mapa;        // matriz dinámica (puntero doble)
+    int **mapa;
     int columnas;
     int filas;
-    int tamanoCelda;    // tamaño de cada celda en píxeles
+    int tamanoCelda;
 
-    void liberarMapa(); // libera la matriz actual, si existe
+    void liberarMapa();
 };
 
 #endif // TABLERO_H

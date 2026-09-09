@@ -579,7 +579,7 @@ void MainWindow::crearPaginaNiveles()
     fondo->setGeometry(0, 0, 800, 700);
     fondo->lower();
 
-    // --- Botón Nivel 1 (siempre desbloqueado) ---
+
     QPushButton *btnNivel1 = new QPushButton(paginaNiveles);
     btnNivel1->setIcon(QIcon(":/Recursos/nivel1boton.png"));
     btnNivel1->setIconSize(QSize(96, 96));

@@ -47,8 +47,8 @@ private:
     QGraphicsPixmapItem *itemRana;
     bool ranaVisible;
     int contadorRana;
-    static const int TICKS_ESPERA_RANA = 40;   // ~6 segundos a 150ms por tick
-    static const int TICKS_DURACION_RANA = 20; // ~3 segundos visible antes de desaparecer
+    static const int TICKS_ESPERA_RANA = 40;   // 6 segundos a 150ms por tick
+    static const int TICKS_DURACION_RANA = 20; // 3 segundos visible antes de desaparecer
 
     QTimer *timerJuego;
 
@@ -82,7 +82,7 @@ private:
     void crearPaginaJuego();
     void iniciarNivel(int columnas, int filas, int tamanoCelda,int metaFrutas, bool modoInfinito, QString rutaFondo, QString rutaSpriteCabeza);
     void iniciarNivel1();
-    void actualizarJuego();       // se llama en cada "tick" del QTimer
+    void actualizarJuego();
     void redibujarSerpiente();    // reconstruye los sprites según la lista de Nodo
     void mostrarPausa();
     void ocultarPausa();

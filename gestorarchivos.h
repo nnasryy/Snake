@@ -20,11 +20,10 @@ public:
     GestorArchivos(string rutaArchivo);
 
     // --- CREATE ---
-    bool crearJugador(DatosJugador nuevoJugador); // false si el nombre ya existe
-
+    bool crearJugador(DatosJugador nuevoJugador);
     // --- READ ---
     bool buscarJugadorPorNombre(string nombre, DatosJugador &resultado);
-    vector<DatosJugador> obtenerTopJugadores(int cantidad); // para pantalla de Récords
+    vector<DatosJugador> obtenerTopJugadores(int cantidad);
 
     // --- UPDATE ---
     bool actualizarJugador(DatosJugador datosActualizados);
@@ -34,12 +33,12 @@ public:
 
 private:
     string ruta;
-    vector<DatosJugador> jugadores; // se carga en memoria al construir el gestor
+    vector<DatosJugador> jugadores;
 
-    void cargarDesdeArchivo();  // "Carga Automática", como en tu hoja de Semana 6
-    void guardarEnArchivo();    // reescribe TODO el archivo con ios::trunc
+    void cargarDesdeArchivo();
+    void guardarEnArchivo();
 
-    int buscarPosicion(string nombre); // equivalente a buscarContactoPorId
+    int buscarPosicion(string nombre);
 };
 
 #endif // GESTORARCHIVOS_H

@@ -4,19 +4,19 @@
 #include <algorithm>
 using namespace std;
 
-const char DELIMITADOR = '|'; // misma práctica que tu hoja: evita que espacios rompan el archivo
+const char DELIMITADOR = '|';
 
 GestorArchivos::GestorArchivos(string rutaArchivo)
 {
     ruta = rutaArchivo;
-    cargarDesdeArchivo(); // Carga Automática al iniciar, como en el ejemplo de clase
+    cargarDesdeArchivo();
 }
 
 void GestorArchivos::cargarDesdeArchivo()
 {
     ifstream archivo(ruta);
     if (!archivo.is_open()) {
-        return; // primera vez que corre el juego, el archivo aún no existe
+        return;
     }
 
     string linea;
@@ -28,7 +28,7 @@ void GestorArchivos::cargarDesdeArchivo()
         getline(ss, jugador.nombre, DELIMITADOR);
 
         getline(ss, campo, DELIMITADOR);
-        jugador.puntajeMaximo = std::stoi(campo); // string → int, igual que tu hoja
+        jugador.puntajeMaximo = std::stoi(campo);
 
         getline(ss, campo, DELIMITADOR);
         jugador.tiempoMaximo = std::stoi(campo);
@@ -43,11 +43,9 @@ void GestorArchivos::cargarDesdeArchivo()
 
 void GestorArchivos::guardarEnArchivo()
 {
-    // ios::trunc: borra el contenido anterior y lo reescribe desde cero,
-    // así el archivo siempre queda igual al estado actual del vector
     ofstream archivo(ruta, std::ios::trunc);
 
-    for (const auto &jugadorActual : jugadores) { // range-based for, evita copias
+    for (const auto &jugadorActual : jugadores) {
         archivo << jugadorActual.nombre << DELIMITADOR
                 << jugadorActual.puntajeMaximo << DELIMITADOR
                 << jugadorActual.tiempoMaximo << DELIMITADOR
@@ -60,21 +58,21 @@ int GestorArchivos::buscarPosicion(string nombre)
 {
     for (int i = 0; i < (int)jugadores.size(); i++) {
         if (jugadores[i].nombre == nombre) {
-            return i; // encontrado, regresamos su posición
+            return i;
         }
     }
-    return -1; // no encontrado
+    return -1;
 }
 
 bool GestorArchivos::crearJugador(DatosJugador nuevoJugador)
 {
-    // Validación de Unicidad: no permitir nombres duplicados
+
     if (buscarPosicion(nuevoJugador.nombre) != -1) {
-        return false; // ya existe, no se crea de nuevo
+        return false;
     }
 
     jugadores.push_back(nuevoJugador);
-    guardarEnArchivo(); // sincroniza con disco inmediatamente
+    guardarEnArchivo();
     return true;
 }
 
@@ -92,11 +90,11 @@ bool GestorArchivos::actualizarJugador(DatosJugador datosActualizados)
 {
     int posicion = buscarPosicion(datosActualizados.nombre);
     if (posicion == -1) {
-        return false; // no existe, no hay nada que actualizar
+        return false;
     }
 
     jugadores[posicion] = datosActualizados;
-    guardarEnArchivo(); // sincroniza el cambio con el disco
+    guardarEnArchivo();
     return true;
 }
 
@@ -107,23 +105,22 @@ bool GestorArchivos::eliminarJugador(string nombre)
         return false;
     }
 
-    jugadores.erase(jugadores.begin() + posicion); // elimina y recorre lo siguiente
+    jugadores.erase(jugadores.begin() + posicion);
     guardarEnArchivo();
     return true;
 }
 
 vector<DatosJugador> GestorArchivos::obtenerTopJugadores(int cantidad)
 {
-    vector<DatosJugador> copia = jugadores; // copiamos para no alterar el orden original
+    vector<DatosJugador> copia = jugadores;
 
-    // Mismo patrón de sort + lambda que tu hoja de Semana 7
     sort(copia.begin(), copia.end(),
               [](const DatosJugador &a, const DatosJugador &b) {
-                  return a.puntajeMaximo > b.puntajeMaximo; // mayor puntaje primero
+                  return a.puntajeMaximo > b.puntajeMaximo;
               });
 
     if ((int)copia.size() > cantidad) {
-        copia.resize(cantidad); // solo nos quedamos con los primeros N
+        copia.resize(cantidad);
     }
     return copia;
 }

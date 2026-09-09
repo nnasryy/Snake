@@ -2,7 +2,7 @@
 
 Tablero::Tablero()
 {
-    // Al construirse, todavía no hay matriz reservada
+
     mapa = nullptr;
     columnas = 0;
     filas = 0;
@@ -11,22 +11,20 @@ Tablero::Tablero()
 
 void Tablero::configurarNivel(int nuevasColumnas, int nuevasFilas, int nuevoTamanoCelda)
 {
-    // Primero liberamos la matriz del nivel anterior (si la había)
+
     liberarMapa();
 
     columnas = nuevasColumnas;
     filas = nuevasFilas;
     tamanoCelda = nuevoTamanoCelda;
 
-    // Reservamos un arreglo de punteros: una entrada por cada fila
     mapa = new int*[filas];
 
-    // Por cada fila, reservamos su propio arreglo de columnas
+
     for (int f = 0; f < filas; f++) {
         mapa[f] = new int[columnas];
     }
 
-    // Inicializamos todas las celdas en 0 (0 = celda vacía)
     for (int f = 0; f < filas; f++) {
         for (int c = 0; c < columnas; c++) {
             mapa[f][c] = 0;
@@ -38,10 +36,10 @@ void Tablero::liberarMapa()
 {
     if (mapa != nullptr) {
         for (int f = 0; f < filas; f++) {
-            delete[] mapa[f];   // libera cada fila individual
+            delete[] mapa[f];
         }
-        delete[] mapa;           // libera el arreglo de punteros
-        mapa = nullptr;          // evita que quede un puntero colgante
+        delete[] mapa;
+        mapa = nullptr;
     }
 }
 
@@ -53,7 +51,7 @@ bool Tablero::dentroDelMapa(int fila, int columna) const
 int Tablero::obtenerValor(int fila, int columna) const
 {
     if (!dentroDelMapa(fila, columna)) {
-        return -1; // valor inválido: fuera de los límites del mapa
+        return -1;
     }
     return mapa[fila][columna];
 }
@@ -80,5 +78,5 @@ int Tablero::getTamanoCelda() const { return tamanoCelda; }
 
 Tablero::~Tablero()
 {
-    liberarMapa(); // destructor explícito, como pide el PDF
+    liberarMapa();
 }

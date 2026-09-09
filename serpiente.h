@@ -19,7 +19,8 @@ public:
     //Encogimiento y escudo
     void encoger(int cantidad);          // quita segmentos del final (rana)
     void activarEscudo();                // activa protección temporal (pez)
-    bool consumirEscudo();               // revisa y gasta el escudo si estaba activo
+    bool consumirEscudo();
+    Direccion getDireccion() const;    // revisa y gasta el escudo si estaba activo
 
     Nodo* getCabeza() const;
     int getLongitud() const;
@@ -30,7 +31,6 @@ private:
     int longitud;
     bool creceProximoMovimiento; // controla si el próximo mover() debe agregar segmento
     bool escudoActivo;
-    Direccion getDireccion() const;
 
 };
 
