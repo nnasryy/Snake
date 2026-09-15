@@ -105,6 +105,7 @@ private:
     void ocultarPausa();
     void crearPaginaVictoria();
     void crearPaginaDerrota();
+    void finalizarPartidaPorDerrota(QString razon);
     void mostrarVictoria(int nivel, int manzanas, int vidas, int segundos, bool esRecord);
     void mostrarDerrota(int nivel, QString razon, int manzanas, int segundos);
 

@@ -14,7 +14,6 @@
         <file>Recursos/MenuOpciones.png</file>
         <file>Recursos/MenuPantalla.png</file>
         <file>Recursos/MenuRecords.png</file>
-        <file>Recursos/MenuAlbum.png</file>
         <file>Recursos/BackgroundNiveles.png</file>
         <file>Recursos/nivel1boton.png</file>
         <file>Recursos/nivel2boton.png</file>
@@ -46,5 +45,9 @@
         <file>Recursos/Reintentar.png</file>
         <file>Recursos/PlayVolumenLvl2.png</file>
         <file>Recursos/PauseVolumenLvl2.png</file>
+        <file>Recursos/PerdisteLvl1.png</file>
+        <file>Recursos/PerdisteLvl2.png</file>
+        <file>Recursos/PerdisteLvl3.png</file>
+        <file>Recursos/MenuAlbum.png</file>
     </qresource>
 </RCC>

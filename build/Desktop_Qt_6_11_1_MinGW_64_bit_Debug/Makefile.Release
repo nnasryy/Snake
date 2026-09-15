@@ -130,6 +130,7 @@ release/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/CascabelHead.png \
 		../../Recursos/MenuJugar.png \
 		../../Recursos/PlayButton.png \
+		../../Recursos/PerdisteLvl2.png \
 		../../Recursos/VolverAMenuPJ.png \
 		../../Recursos/Manzana.png \
 		../../Recursos/CascabelColaLeft.png \
@@ -142,6 +143,7 @@ release/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/GanasteLvl3.png \
 		../../Recursos/CascabelHeadLeft.png \
 		../../Recursos/GanasteLvl2.png \
+		../../Recursos/PerdisteLvl3.png \
 		../../Recursos/BoaHead.png \
 		../../Recursos/BoaColaLeft.png \
 		../../Recursos/NodoNaranjaLvl1.png \
@@ -165,6 +167,7 @@ release/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/nivel3boton.png \
 		../../Recursos/SeguirJugandoPJ.png \
 		../../Recursos/NodoNegroLvl1.png \
+		../../Recursos/PerdisteLvl1.png \
 		../../Recursos/PauseVolumenLvl2.png \
 		../../Recursos/UsernameConfirmar.png \
 		../../Recursos/PlayVolumen.png \

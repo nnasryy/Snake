@@ -558,20 +558,29 @@ void MainWindow::actualizarJuego()
     }
 
     if (ranaVisible && cabeza->x == ranaJuego.getX() && cabeza->y == ranaJuego.getY()) {
-
         if (serpienteJuego.getLongitud() <= LONGITUD_MINIMA_SEGURA) {
             vidasRestantes--;
             lblValorVidas->setText(QString::number(vidasRestantes));
             qDebug() << "¡Rana comida con serpiente muy pequeña! Vida perdida.";
+
+            escenaJuego->removeItem(itemRana);
+            delete itemRana;
+            itemRana = nullptr;
+            ranaVisible = false;
+            contadorRana = 0;
+
+            if (vidasRestantes <= 0) {
+                finalizarPartidaPorDerrota("Te quedaste sin vidas comiendo ranas");
+                return;
+            }
         } else {
             serpienteJuego.encoger(2);
+            escenaJuego->removeItem(itemRana);
+            delete itemRana;
+            itemRana = nullptr;
+            ranaVisible = false;
+            contadorRana = 0;
         }
-
-        escenaJuego->removeItem(itemRana);
-        delete itemRana;
-        itemRana = nullptr;
-        ranaVisible = false;
-        contadorRana = 0;
     }
 
     if (serpienteJuego.chocaConsigoMisma()) {
@@ -579,16 +588,15 @@ void MainWindow::actualizarJuego()
         lblValorVidas->setText(QString::number(vidasRestantes));
 
         if (vidasRestantes <= 0) {
-            timerJuego->stop();
-            timerReloj->stop();
-            if (frutasComidas > jugadorActual.puntajeMaximo) jugadorActual.puntajeMaximo = frutasComidas;
-            gestorArchivos->actualizarJugador(jugadorActual);
-            mostrarDerrota(1, "Chocaste contigo mismo", frutasComidas, segundosTranscurridos);
+            finalizarPartidaPorDerrota("Chocaste contigo mismo");
+            return;
+        } else {
+            serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2);
         }
-
     }
+
     redibujarSerpiente();
-}
+    }
 
 void MainWindow::crearPaginaNiveles()
 {
@@ -734,6 +742,7 @@ Direccion MainWindow::calcularDireccionEntreNodos(Nodo* desde, Nodo* hacia)
 
 void MainWindow::iniciarNivel1()
 {
+    nivelJugadoActual = 1;
     if (cicloColoresNivel != nullptr) {
         delete[] cicloColoresNivel;
     }
@@ -901,16 +910,16 @@ void MainWindow::crearPaginaDerrota()
     fondoDerrota->lower();
 
     lblRazonDerrota = new QLabel(paginaDerrota);
-    lblRazonDerrota->setGeometry(101, 324, 600, 50);
-    lblRazonDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 33px;").arg(familiaFuente));
+    lblRazonDerrota->setGeometry(101, 324, 600, 40);
+    lblRazonDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 50px;").arg(familiaFuente));
 
     lblManzanasDerrota = new QLabel(paginaDerrota);
-    lblManzanasDerrota->setGeometry(98, 53, 300, 50);
-    lblManzanasDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 33px;").arg(familiaFuente));
+    lblManzanasDerrota->setGeometry(534, 53, 300, 50);
+    lblManzanasDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 40px;").arg(familiaFuente));
 
     lblTiempoDerrota = new QLabel(paginaDerrota);
     lblTiempoDerrota->setGeometry(534, 416, 200, 50);
-    lblTiempoDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 33px;").arg(familiaFuente));
+    lblTiempoDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 40px;").arg(familiaFuente));
 
     QPushButton *btnReintentar = new QPushButton(paginaDerrota);
     btnReintentar->setIcon(QIcon(":/Recursos/Reintentar.png"));
@@ -956,6 +965,18 @@ void MainWindow::mostrarDerrota(int nivel, QString razon, int manzanas, int segu
     lblTiempoDerrota->setText(QString("%1:%2").arg(minutos, 2, 10, QChar('0')).arg(segs, 2, 10, QChar('0')));
 
     stack->setCurrentWidget(paginaDerrota);
+}
+void MainWindow::finalizarPartidaPorDerrota(QString razon)
+{
+    timerJuego->stop();
+    timerReloj->stop();
+
+    if (frutasComidas > jugadorActual.puntajeMaximo) {
+        jugadorActual.puntajeMaximo = frutasComidas;
+    }
+    gestorArchivos->actualizarJugador(jugadorActual);
+
+    mostrarDerrota(nivelJugadoActual, razon, frutasComidas, segundosTranscurridos);
 }
 
 void MainWindow::mostrarPausa()
