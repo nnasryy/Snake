@@ -11,7 +11,6 @@ Tablero::Tablero()
 
 void Tablero::configurarNivel(int nuevasColumnas, int nuevasFilas, int nuevoTamanoCelda)
 {
-
     liberarMapa();
 
     columnas = nuevasColumnas;

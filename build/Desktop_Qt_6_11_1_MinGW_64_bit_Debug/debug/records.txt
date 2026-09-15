@@ -1,2 +1,2 @@
-nasry|0|0|1
+nasry|10|88|2
 herminix|0|0|1

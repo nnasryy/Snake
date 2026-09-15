@@ -12,7 +12,7 @@ bool Comida::posicionValida(int fila, int columna, Tablero &tablero, Serpiente &
 {
 
     if (tablero.obtenerValor(fila, columna) == 1) {
-        return false;
+        return false;//no es valida
     }
 
     Nodo* actual = serpiente.getCabeza();

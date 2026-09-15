@@ -28,5 +28,23 @@
         <file>Recursos/nivel1background.png</file>
         <file>Recursos/Manzana.png</file>
         <file>Recursos/BoaCola.png</file>
+        <file>Recursos/VolverAMenuPJ.png</file>
+        <file>Recursos/SeguirJugandoPJ.png</file>
+        <file>Recursos/GanasteLvl1.png</file>
+        <file>Recursos/GanasteLvl2.png</file>
+        <file>Recursos/GanasteLvl3.png</file>
+        <file>Recursos/VerEnAlbum.png</file>
+        <file>Recursos/VolverAMenu.png</file>
+        <file>Recursos/SiguienteNivel.png</file>
+        <file>Recursos/CascabelCola.png</file>
+        <file>Recursos/CascabelColaLeft.png</file>
+        <file>Recursos/CascabelHead.png</file>
+        <file>Recursos/CascabelHeadLeft.png</file>
+        <file>Recursos/BoaColaLeft.png</file>
+        <file>Recursos/BoaHeadLeft.png</file>
+        <file>Recursos/RatonLvl2.png</file>
+        <file>Recursos/Reintentar.png</file>
+        <file>Recursos/PlayVolumenLvl2.png</file>
+        <file>Recursos/PauseVolumenLvl2.png</file>
     </qresource>
 </RCC>

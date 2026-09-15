@@ -127,14 +127,26 @@ debug/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/UsernameSalir.png \
 		../../Recursos/RanaLvl1.png \
 		../../Recursos/ExitButton.png \
+		../../Recursos/CascabelHead.png \
 		../../Recursos/MenuJugar.png \
 		../../Recursos/PlayButton.png \
+		../../Recursos/VolverAMenuPJ.png \
 		../../Recursos/Manzana.png \
+		../../Recursos/CascabelColaLeft.png \
 		../../Recursos/BackgroundNiveles.png \
 		../../Recursos/MenuPantalla.png \
 		../../Recursos/nivel2boton.png \
+		../../Recursos/GanasteLvl1.png \
+		../../Recursos/BoaHeadLeft.png \
+		../../Recursos/RatonLvl2.png \
+		../../Recursos/GanasteLvl3.png \
+		../../Recursos/CascabelHeadLeft.png \
+		../../Recursos/GanasteLvl2.png \
 		../../Recursos/BoaHead.png \
+		../../Recursos/BoaColaLeft.png \
 		../../Recursos/NodoNaranjaLvl1.png \
+		../../Recursos/VolverAMenu.png \
+		../../Recursos/SiguienteNivel.png \
 		../../Recursos/MenuRecords.png \
 		../../Recursos/Pixellari.ttf \
 		../../Recursos/nivel1boton.png \
@@ -148,10 +160,16 @@ debug/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/UsernamePantalla.png \
 		../../Recursos/MenuOpciones.png \
 		../../Recursos/safariboton.png \
+		../../Recursos/CascabelCola.png \
+		../../Recursos/Reintentar.png \
 		../../Recursos/nivel3boton.png \
+		../../Recursos/SeguirJugandoPJ.png \
 		../../Recursos/NodoNegroLvl1.png \
+		../../Recursos/PauseVolumenLvl2.png \
 		../../Recursos/UsernameConfirmar.png \
-		../../Recursos/PlayVolumen.png
+		../../Recursos/PlayVolumen.png \
+		../../Recursos/PlayVolumenLvl2.png \
+		../../Recursos/VerEnAlbum.png
 	C:\Qt\6.11.1\mingw_64\bin\rcc.exe -name Recursos --no-zstd ..\..\Recursos.qrc -o debug\qrc_Recursos.cpp
 
 compiler_moc_predefs_make_all: debug/moc_predefs.h

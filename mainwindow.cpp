@@ -5,12 +5,16 @@
 #include <QDebug>
 #include <QDirIterator>
 #include <QFontDatabase>
+#include <QTransform>
 
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    cicloColoresNivel = nullptr;
+    cantidadColoresCiclo = 0;
+
     QDirIterator it(":/", QDirIterator::Subdirectories);
     while (it.hasNext()) {
         QString ruta = it.next();
@@ -24,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug() << "No se pudo cargar Pixellari, usando fuente por defecto";
         familiaFuente = "Arial";
     }
-//porque aqui es minuscula?
+    //porque aqui es minuscula?
     gestorArchivos = new GestorArchivos("records.txt");
 
     stack = new QStackedWidget(this);
@@ -35,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     crearPaginaMenuPrincipal();
     crearPaginaNiveles();
     crearPaginaJuego();
+    crearPaginaVictoria();
+    crearPaginaDerrota();
 
     resize(800, 700);
     setWindowTitle("Snake Avanzado");
@@ -331,22 +337,30 @@ void MainWindow::crearPaginaJuego()
 
     // --- Overlay de pausa (oculto por defecto) ---
     overlayPausa = new QWidget(paginaJuego);
-    overlayPausa->setGeometry(200, 250, 400, 200);
+    overlayPausa->setGeometry(200, 200, 400, 260);
     overlayPausa->setStyleSheet("background-color: rgba(15, 58, 13, 230); border: 5px solid rgb(143, 208, 53);");
     overlayPausa->setVisible(false);
 
-    QPushButton *btnReanudar = new QPushButton("Reanudar", overlayPausa);
-    btnReanudar->setGeometry(50, 50, 300, 50);
+    QPushButton *btnReanudar = new QPushButton(overlayPausa);
+    btnReanudar->setIcon(QIcon(":/Recursos/SeguirJugandoPJ.png"));
+    btnReanudar->setIconSize(QSize(300, 100));
+    btnReanudar->setGeometry(50, 30, 300, 100);
+    btnReanudar->setFlat(true);
+    btnReanudar->setStyleSheet("border: none; background: transparent;");
     connect(btnReanudar, &QPushButton::clicked, this, &MainWindow::ocultarPausa);
 
-    QPushButton *btnVolverMenu = new QPushButton("Volver al menú", overlayPausa);
-    btnVolverMenu->setGeometry(50, 120, 300, 50);
+    QPushButton *btnVolverMenu = new QPushButton(overlayPausa);
+    btnVolverMenu->setIcon(QIcon(":/Recursos/VolverAMenuPJ.png"));
+    btnVolverMenu->setIconSize(QSize(300, 100));
+    btnVolverMenu->setGeometry(50, 140, 300, 100);
+    btnVolverMenu->setFlat(true);
+    btnVolverMenu->setStyleSheet("border: none; background: transparent;");
     connect(btnVolverMenu, &QPushButton::clicked, this, [this](){
         timerJuego->stop();
+        timerReloj->stop();
         ocultarPausa();
         stack->setCurrentWidget(paginaMenuPrincipal);
     });
-
     // --- Timer del juego ---
     timerJuego = new QTimer(this);
     connect(timerJuego, &QTimer::timeout, this, &MainWindow::actualizarJuego);
@@ -411,7 +425,6 @@ void MainWindow::iniciarNivel(int columnas, int filas, int tamanoCelda,
 
 void MainWindow::redibujarSerpiente()
 {
-    // Liberamos los sprites del tick anterior
     if (segmentosVisuales != nullptr) {
         for (int i = 0; i < cantidadSegmentosVisuales; i++) {
             escenaJuego->removeItem(segmentosVisuales[i]);
@@ -425,25 +438,31 @@ void MainWindow::redibujarSerpiente()
     cantidadSegmentosVisuales = longitudActual;
 
     Nodo* actual = serpienteJuego.getCabeza();
+    Nodo* anterior = nullptr; // necesario para calcular dirección de la cola
     int indice = 0;
 
-
-    // Patrón de colores: cabeza, luego negro-amarillo-naranja repitiendo
     while (actual != nullptr) {
-        QString rutaSprite;
+        QPixmap pixmapSprite;
 
         if (indice == 0) {
-            rutaSprite = ":/Recursos/BoaHead.png";
+            Direccion dirCabeza = serpienteJuego.getDireccion();
+            // Antes: obtenerSpriteDireccional(":/Recursos/BoaHead.png", ":/Recursos/BoaHeadLeft.png", dirCabeza);
+            pixmapSprite = obtenerSpriteDireccional(":/Recursos/BoaHeadLeft.png", ":/Recursos/BoaHead.png", dirCabeza);
         } else if (actual->siguiente == nullptr) {
-            rutaSprite = ":/Recursos/BoaCola.png";
+            // Cola: dirección calculada entre el nodo anterior y este
+            Direccion dirCola = calcularDireccionEntreNodos(anterior, actual);
+            pixmapSprite = obtenerSpriteDireccional(":/Recursos/BoaCola.png", ":/Recursos/BoaColaLeft.png", dirCola);
+
         } else {
-            int patron = (indice - 1) % 3;
-            if (patron == 0) rutaSprite = ":/Recursos/NodoNegroLvl1.png";
-            else if (patron == 1) rutaSprite = ":/Recursos/NodoAmarilloLvl1.png";
-            else rutaSprite = ":/Recursos/NodoNaranjaLvl1.png";
+            int patron = (indice - 1) % cantidadColoresCiclo;
+            pixmapSprite = QPixmap(cicloColoresNivel[patron]);
         }
 
-        QGraphicsPixmapItem *sprite = escenaJuego->addPixmap(QPixmap(rutaSprite));
+        // Escala al tamaño de celda actual (por si la rotación cambia dimensiones)
+        pixmapSprite = pixmapSprite.scaled(tamanoCeldaActual, tamanoCeldaActual,
+                                           Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+        QGraphicsPixmapItem *sprite = escenaJuego->addPixmap(pixmapSprite);
         sprite->setPos(
             origenXCuadricula + actual->x * tamanoCeldaActual,
             origenYCuadricula + actual->y * tamanoCeldaActual
@@ -451,6 +470,7 @@ void MainWindow::redibujarSerpiente()
 
         segmentosVisuales[indice] = sprite;
         indice++;
+        anterior = actual;
         actual = actual->siguiente;
     }
 }
@@ -496,7 +516,12 @@ void MainWindow::actualizarJuego()
         if (frutasComidas >= metaFrutasNivel) {
             timerJuego->stop();
             timerReloj->stop();
-            qDebug() << "¡Nivel completado!";
+            bool esRecordNuevo = (frutasComidas > jugadorActual.puntajeMaximo);
+            if (frutasComidas > jugadorActual.puntajeMaximo) jugadorActual.puntajeMaximo = frutasComidas;
+            if (segundosTranscurridos > jugadorActual.tiempoMaximo) jugadorActual.tiempoMaximo = segundosTranscurridos;
+            if (jugadorActual.nivelMaximoAlcanzado < 2) jugadorActual.nivelMaximoAlcanzado = 2;
+            gestorArchivos->actualizarJugador(jugadorActual);
+            mostrarVictoria(1, frutasComidas, vidasRestantes, segundosTranscurridos, esRecordNuevo);
         }
     }
 
@@ -556,16 +581,12 @@ void MainWindow::actualizarJuego()
         if (vidasRestantes <= 0) {
             timerJuego->stop();
             timerReloj->stop();
-            qDebug() << "Game Over definitivo: sin vidas restantes";
-            // más adelante: stack->setCurrentWidget(paginaGameOver);
-        } else {
-            // Reinicia la serpiente sin perder el progreso de frutasComidas
-            serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2);
-            qDebug() << "Chocó, pero le quedan vidas. Vidas restantes:" << vidasRestantes;
+            if (frutasComidas > jugadorActual.puntajeMaximo) jugadorActual.puntajeMaximo = frutasComidas;
+            gestorArchivos->actualizarJugador(jugadorActual);
+            mostrarDerrota(1, "Chocaste contigo mismo", frutasComidas, segundosTranscurridos);
         }
+
     }
-
-
     redibujarSerpiente();
 }
 
@@ -663,8 +684,59 @@ void MainWindow::crearPaginaNiveles()
 
     stack->addWidget(paginaNiveles);
 }
+
+QPixmap MainWindow::obtenerSpriteDireccional(QString rutaDerecha, QString rutaIzquierda, Direccion direccion)
+{
+    switch (direccion) {
+    case DERECHA:
+        return QPixmap(rutaDerecha);
+
+    case IZQUIERDA:
+        return QPixmap(rutaIzquierda);
+
+    case ARRIBA: {
+        QPixmap base(rutaDerecha);
+        QTransform rotacion;
+        rotacion.rotate(-90); // derecha -> arriba (antihorario)
+        return base.transformed(rotacion, Qt::SmoothTransformation);
+    }
+
+    case ABAJO: {
+        QPixmap base(rutaDerecha);
+        QTransform rotacion;
+        rotacion.rotate(90); // derecha -> abajo (horario)
+        return base.transformed(rotacion, Qt::SmoothTransformation);
+    }
+    }
+    return QPixmap(rutaDerecha); // fallback, no debería llegar aquí
+}
+
+Direccion MainWindow::calcularDireccionEntreNodos(Nodo* desde, Nodo* hacia)
+{
+    int dx = hacia->x - desde->x;
+    int dy = hacia->y - desde->y;
+
+    // Corrige el salto falso que provoca el wraparound
+    if (dx > 1) dx = -1;
+    else if (dx < -1) dx = 1;
+
+    if (dy > 1) dy = -1;
+    else if (dy < -1) dy = 1;
+
+    if (dx == 1) return DERECHA;
+    if (dx == -1) return IZQUIERDA;
+    if (dy == 1) return ABAJO;
+    if (dy == -1) return ARRIBA;
+
+    return DERECHA; // no debería pasar si desde != hacia
+}
+
+
 void MainWindow::iniciarNivel1()
 {
+    if (cicloColoresNivel != nullptr) {
+        delete[] cicloColoresNivel;
+    }
     ranaVisible = false;
     contadorRana = 0;
     itemRana = nullptr;
@@ -678,6 +750,11 @@ void MainWindow::iniciarNivel1()
     segundosTranscurridos = 0;
     lblValorTiempo->setText("00:00");
     timerReloj->start();
+    cantidadColoresCiclo = 3;
+    cicloColoresNivel = new QString[3];
+    cicloColoresNivel[0] = ":/Recursos/NodoNegroLvl1.png";
+    cicloColoresNivel[1] = ":/Recursos/NodoAmarilloLvl1.png";
+    cicloColoresNivel[2] = ":/Recursos/NodoNaranjaLvl1.png";
 
     tableroJuego.configurarNivel(14, 10, 50);
 
@@ -723,6 +800,164 @@ void MainWindow::iniciarNivel1()
 
     stack->setCurrentWidget(paginaJuego);
 }
+
+void MainWindow::crearPaginaVictoria()
+{
+    paginaVictoria = new QWidget();
+
+    fondoVictoria = new QLabel(paginaVictoria);
+    fondoVictoria->setGeometry(0, 0, 800, 700);
+    fondoVictoria->lower();
+
+    lblVidasVictoria = new QLabel(paginaVictoria);
+    lblVidasVictoria->setGeometry(436, 346, 150, 50);
+    lblVidasVictoria->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 30px;").arg(familiaFuente));
+
+    lblManzanasVictoria = new QLabel(paginaVictoria);
+    lblManzanasVictoria->setGeometry(199, 346, 150, 50);
+    lblManzanasVictoria->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 30px;").arg(familiaFuente));
+
+    lblTiempoVictoria = new QLabel(paginaVictoria);
+    lblTiempoVictoria->setGeometry(598, 344, 180, 50);
+    lblTiempoVictoria->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 32px;").arg(familiaFuente));
+
+    QPushButton *btnVerAlbum = new QPushButton(paginaVictoria);
+    btnVerAlbum->setIcon(QIcon(":/Recursos/VerEnAlbum.png"));
+    btnVerAlbum->setIconSize(QSize(218, 55));
+    btnVerAlbum->setGeometry(38, 590, 218, 55);
+    btnVerAlbum->setFlat(true);
+    btnVerAlbum->setStyleSheet("border: none; background: transparent;");
+    connect(btnVerAlbum, &QPushButton::clicked, this, [this](){
+        qDebug() << "Abrir álbum (pendiente)";
+    });
+
+    QPushButton *btnVolverMenuVictoria = new QPushButton(paginaVictoria);
+    btnVolverMenuVictoria->setIcon(QIcon(":/Recursos/VolverAMenu.png"));
+    btnVolverMenuVictoria->setIconSize(QSize(218, 55));
+    btnVolverMenuVictoria->setGeometry(291, 590, 218, 55);
+    btnVolverMenuVictoria->setFlat(true);
+    btnVolverMenuVictoria->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolverMenuVictoria, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaMenuPrincipal);
+    });
+
+    btnSiguienteNivel = new QPushButton(paginaVictoria);
+    btnSiguienteNivel->setIcon(QIcon(":/Recursos/SiguienteNivel.png"));
+    btnSiguienteNivel->setIconSize(QSize(218, 55));
+    btnSiguienteNivel->setGeometry(554, 590, 218, 55);
+    btnSiguienteNivel->setFlat(true);
+    btnSiguienteNivel->setStyleSheet("border: none; background: transparent;");
+    connect(btnSiguienteNivel, &QPushButton::clicked, this, [this](){
+        if (nivelJugadoActual == 1) {
+            qDebug() << "Iniciar Nivel 2 (pendiente)";
+        } else if (nivelJugadoActual == 2) {
+            qDebug() << "Iniciar Nivel 3 (pendiente)";
+        }
+    });
+
+    QPushButton *btnVolumenVictoria = new QPushButton(paginaVictoria);
+    btnVolumenVictoria->setCheckable(true);
+    btnVolumenVictoria->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
+    btnVolumenVictoria->setIconSize(QSize(74, 74));
+    btnVolumenVictoria->setGeometry(693, 83, 74, 74);
+    btnVolumenVictoria->setFlat(true);
+    btnVolumenVictoria->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolumenVictoria, &QPushButton::toggled, this, [btnVolumenVictoria](bool activado){
+        btnVolumenVictoria->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
+    });
+
+    stack->addWidget(paginaVictoria);
+}
+void MainWindow::mostrarVictoria(int nivel, int manzanas, int vidas, int segundos, bool esRecord)
+{
+    nivelJugadoActual = nivel;
+
+    QString rutaFondo = (nivel == 1) ? ":/Recursos/GanasteLvl1.png"
+                        : (nivel == 2) ? ":/Recursos/GanasteLvl2.png"
+                                       : ":/Recursos/GanasteLvl3.png";
+
+    fondoVictoria->setPixmap(QPixmap(rutaFondo));
+    fondoVictoria->setGeometry(0, 0, 800, 700);
+
+    lblManzanasVictoria->setText(QString::number(manzanas));
+    lblVidasVictoria->setText(QString::number(vidas));
+
+    int minutos = segundos / 60;
+    int segs = segundos % 60;
+    QString textoTiempo = QString("%1:%2").arg(minutos, 2, 10, QChar('0')).arg(segs, 2, 10, QChar('0'));
+    if (esRecord) textoTiempo += " !";
+    lblTiempoVictoria->setText(textoTiempo);
+
+    btnSiguienteNivel->setVisible(nivel < 3); // no hay "siguiente" después del Nivel 3
+
+    stack->setCurrentWidget(paginaVictoria);
+}
+void MainWindow::crearPaginaDerrota()
+{
+    paginaDerrota = new QWidget();
+
+    fondoDerrota = new QLabel(paginaDerrota);
+    fondoDerrota->setGeometry(0, 0, 800, 700);
+    fondoDerrota->lower();
+
+    lblRazonDerrota = new QLabel(paginaDerrota);
+    lblRazonDerrota->setGeometry(101, 324, 600, 50);
+    lblRazonDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 33px;").arg(familiaFuente));
+
+    lblManzanasDerrota = new QLabel(paginaDerrota);
+    lblManzanasDerrota->setGeometry(98, 53, 300, 50);
+    lblManzanasDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 33px;").arg(familiaFuente));
+
+    lblTiempoDerrota = new QLabel(paginaDerrota);
+    lblTiempoDerrota->setGeometry(534, 416, 200, 50);
+    lblTiempoDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 33px;").arg(familiaFuente));
+
+    QPushButton *btnReintentar = new QPushButton(paginaDerrota);
+    btnReintentar->setIcon(QIcon(":/Recursos/Reintentar.png"));
+    btnReintentar->setIconSize(QSize(218, 55));
+    btnReintentar->setGeometry(101, 554, 218, 55);
+    btnReintentar->setFlat(true);
+    btnReintentar->setStyleSheet("border: none; background: transparent;");
+    connect(btnReintentar, &QPushButton::clicked, this, [this](){
+        if (nivelJugadoActual == 1) iniciarNivel1();
+        // else if (nivelJugadoActual == 2) iniciarNivel2();
+        // else iniciarNivel3();
+    });
+
+    QPushButton *btnVolverMenuDerrota = new QPushButton(paginaDerrota);
+    btnVolverMenuDerrota->setIcon(QIcon(":/Recursos/VolverAMenu.png"));
+    btnVolverMenuDerrota->setIconSize(QSize(218, 55));
+    btnVolverMenuDerrota->setGeometry(463, 554, 218, 55);
+    btnVolverMenuDerrota->setFlat(true);
+    btnVolverMenuDerrota->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolverMenuDerrota, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaMenuPrincipal);
+    });
+
+    stack->addWidget(paginaDerrota);
+}
+
+void MainWindow::mostrarDerrota(int nivel, QString razon, int manzanas, int segundos)
+{
+    nivelJugadoActual = nivel;
+
+    QString rutaFondo = (nivel == 1) ? ":/Recursos/PerdisteLvl1.png"
+                        : (nivel == 2) ? ":/Recursos/PerdisteLvl2.png"
+                                       : ":/Recursos/PerdisteLvl3.png";
+
+    fondoDerrota->setPixmap(QPixmap(rutaFondo));
+    fondoDerrota->setGeometry(0, 0, 800, 700);
+
+    lblRazonDerrota->setText(razon);
+    lblManzanasDerrota->setText(QString::number(manzanas));
+
+    int minutos = segundos / 60;
+    int segs = segundos % 60;
+    lblTiempoDerrota->setText(QString("%1:%2").arg(minutos, 2, 10, QChar('0')).arg(segs, 2, 10, QChar('0')));
+
+    stack->setCurrentWidget(paginaDerrota);
+}
+
 void MainWindow::mostrarPausa()
 {
     timerJuego->stop();
