@@ -19,7 +19,6 @@
         <file>Recursos/nivel2boton.png</file>
         <file>Recursos/nivel3boton.png</file>
         <file>Recursos/safariboton.png</file>
-        <file>Recursos/BoaHead.png</file>
         <file>Recursos/RanaLvl1.png</file>
         <file>Recursos/NodoAmarilloLvl1.png</file>
         <file>Recursos/NodoNaranjaLvl1.png</file>
@@ -49,5 +48,23 @@
         <file>Recursos/PerdisteLvl2.png</file>
         <file>Recursos/PerdisteLvl3.png</file>
         <file>Recursos/MenuAlbum.png</file>
+        <file>Recursos/BoaHead.png</file>
+        <file>Recursos/nivel2background.png</file>
+        <file>Recursos/nivel3background.png</file>
+        <file>Recursos/ManzanaLvl2.png</file>
+        <file>Recursos/ManzanaLvl3.png</file>
+        <file>Recursos/NodoLvl2.png</file>
+        <file>Recursos/PiedraLvl3.png</file>
+        <file>Recursos/PlayVolumenLvl3.png</file>
+        <file>Recursos/PauseVolumenLvl3.png</file>
+        <file>Recursos/RocaLvl2.png</file>
+        <file>Recursos/MarinaHead.png</file>
+        <file>Recursos/MarinaHeadLeft.png</file>
+        <file>Recursos/MarinaTail.png</file>
+        <file>Recursos/MarinaTailLeft.png</file>
+        <file>Recursos/PezLvl3.png</file>
+        <file>Recursos/NodoAzulLvl3.png</file>
+        <file>Recursos/NodoNegroLvl3.png</file>
+        <file>Recursos/PezGloboLvl3.png</file>
     </qresource>
 </RCC>

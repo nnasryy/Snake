@@ -30,6 +30,16 @@ void Tablero::configurarNivel(int nuevasColumnas, int nuevasFilas, int nuevoTama
         }
     }
 }
+void Tablero::generarBloquesInternos()
+{
+    // Coordenadas (fila, columna) a mano — ajusta a tu gusto,
+    // evitando tapar por completo el paso de la serpiente
+    asignarValor(4, 6, 1);
+    asignarValor(4, 7, 1);
+    asignarValor(4, 8, 1);
+    asignarValor(7, 10, 1);
+    asignarValor(8, 10, 1);
+}
 
 void Tablero::liberarMapa()
 {

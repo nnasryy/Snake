@@ -11,13 +11,19 @@
 #include <QTimer>
 #include <QKeyEvent>
 #include <QLabel>
+#include <QString>
 #include <QTransform>
-
+#include <algorithm>
 #include "gestorarchivos.h"
 #include "tablero.h"
 #include "serpiente.h"
 #include "comida.h"
 
+struct BloqueMovil {
+    int x, y;
+    int dx, dy; // dirección de movimiento: -1, 0 o 1 en cada eje
+    QGraphicsPixmapItem* sprite;
+};
 
 class MainWindow : public QMainWindow
 {
@@ -51,6 +57,12 @@ private:
     int contadorRana;
     static const int TICKS_ESPERA_RANA = 40;   // 6 segundos a 150ms por tick
     static const int TICKS_DURACION_RANA = 20; // 3 segundos visible antes de desaparecer
+    static const int CANTIDAD_BLOQUES_MOVILES = 3;
+    BloqueMovil bloquesMoviles[CANTIDAD_BLOQUES_MOVILES];
+    int contadorMovimientoBloques;
+    static const int TICKS_MOVIMIENTO_BLOQUE = 18; // se mueven cada 5 ticks (más lento que la serpiente, para que sea justo)
+    void inicializarBloquesMoviles();
+    void moverBloquesMoviles();
     QWidget *paginaVictoria;
     QWidget *paginaDerrota;
     QLabel *fondoVictoria;
@@ -74,15 +86,37 @@ private:
     QString spriteCuerpoNivel;
     QString* cicloColoresNivel = nullptr;
     int cantidadColoresCiclo = 0;
-
+    QPushButton *btnPausaJuego;       // el de arriba a la derecha
+    QPushButton *btnToggleMusica;     // dentro del overlay de pausa
+    QString rutaIconoPausa;           // ícono del botón de pausa, cambia por nivel
+    QString rutaVolumenPlay, rutaVolumenPause; // íconos del toggle, cambian por nivel
+    void actualizarIconosPausa(QString iconoPausa, QString volumenPlay, QString volumenPause);
     int origenXCuadricula, origenYCuadricula, tamanoCeldaActual;
     int frutasComidas, segundosRestantes;
     int metaFrutasNivel;
     int vidasRestantes;
     static const int LONGITUD_MINIMA_SEGURA = 3; // si está en esta longitud o menos, la rana quita vida en vez de encoger
-
+    Comida powerUpJuego;
+    QGraphicsPixmapItem *itemPowerUp;
+    bool powerUpVisible;
+    int contadorPowerUp;
+    QString rutaSpritePowerUp;
+    int tipoEfectoPowerUp; // 0 = encoger (rana), 1 = ralentizar (ratón), 2 = escudo (pez)
+    int intervaloOriginalJuego;
+    int contadorRalentizado;
+    bool ralentizadoActivo;
+    bool modoInfinitoActual;
+    void iniciarNivel2();
     QGraphicsPixmapItem **segmentosVisuales; // arreglo dinámico de sprites de la serpiente
     int cantidadSegmentosVisuales;
+    QString rutaCabezaD;
+    QString rutaCabezaI;
+    QString rutaColaD;
+    QString rutaColaI;
+    int intervaloBaseNivel2;      // velocidad "real" según el progreso, sin contar el power-up de ratón
+    static const int INTERVALO_MINIMO_NIVEL2 = 90; // no dejar que se vuelva injugable
+    void iniciarNivel3();
+
 
     QGraphicsPixmapItem *itemComida;
 
@@ -97,6 +131,8 @@ private:
     void crearPaginaMenuPrincipal();
     void crearPaginaNiveles();
     void crearPaginaJuego();
+    void dibujarGridPermanente(QColor colorLinea);
+    void dibujarMuros(QString rutaSpriteMuro);
     void iniciarNivel(int columnas, int filas, int tamanoCelda,int metaFrutas, bool modoInfinito, QString rutaFondo, QString rutaSpriteCabeza);
     void iniciarNivel1();
     void actualizarJuego();

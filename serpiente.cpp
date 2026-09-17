@@ -5,8 +5,6 @@ Serpiente::Serpiente()
     cabeza = nullptr;
     direccionActual = DERECHA;
     longitud = 0;
-    creceProximoMovimiento = false;
-     escudoActivo = false;
 }
 
 void Serpiente::inicializar(int xInicial, int yInicial)
@@ -130,19 +128,6 @@ void Serpiente::encoger(int cantidad)
         longitud--;
     }
 }
-
-void Serpiente::activarEscudo()
-{
-    escudoActivo = true;
-}
 Direccion Serpiente::getDireccion() const {
     return direccionActual;
-}
-bool Serpiente::consumirEscudo()
-{
-    if (escudoActivo) {
-        escudoActivo = false;
-        return true;
-    }
-    return false;
 }

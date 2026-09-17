@@ -126,53 +126,70 @@ release/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../../../Qt/6.11.1/mingw_64/bin/rcc.exe \
 		../../Recursos/UsernameSalir.png \
 		../../Recursos/RanaLvl1.png \
-		../../Recursos/ExitButton.png \
-		../../Recursos/CascabelHead.png \
-		../../Recursos/MenuJugar.png \
-		../../Recursos/PlayButton.png \
 		../../Recursos/PerdisteLvl2.png \
 		../../Recursos/VolverAMenuPJ.png \
 		../../Recursos/Manzana.png \
-		../../Recursos/CascabelColaLeft.png \
+		../../Recursos/ManzanaLvl2.png \
 		../../Recursos/BackgroundNiveles.png \
-		../../Recursos/MenuPantalla.png \
-		../../Recursos/nivel2boton.png \
-		../../Recursos/GanasteLvl1.png \
-		../../Recursos/BoaHeadLeft.png \
+		../../Recursos/MarinaTail.png \
 		../../Recursos/RatonLvl2.png \
 		../../Recursos/GanasteLvl3.png \
 		../../Recursos/CascabelHeadLeft.png \
 		../../Recursos/GanasteLvl2.png \
+		../../Recursos/MarinaHeadLeft.png \
+		../../Recursos/MarinaTailLeft.png \
+		../../Recursos/Pixellari.ttf \
+		../../Recursos/nivel1boton.png \
+		../../Recursos/nivel1background.png \
+		../../Recursos/PlayVolumenLvl3.png \
+		../../Recursos/RocaLvl2.png \
+		../../Recursos/PauseVolumen.png \
+		../../Recursos/MenuInstrucciones.png \
+		../../Recursos/SnakeInicio.png \
+		../../Recursos/PauseVolumenLvl3.png \
+		../../Recursos/MarinaHead.png \
+		../../Recursos/UsernamePantalla.png \
+		../../Recursos/ManzanaLvl3.png \
+		../../Recursos/MenuOpciones.png \
+		../../Recursos/safariboton.png \
+		../../Recursos/SeguirJugandoPJ.png \
+		../../Recursos/PlayVolumen.png \
+		../../Recursos/VerEnAlbum.png \
+		../../Recursos/nivel2background.png \
+		../../Recursos/ExitButton.png \
+		../../Recursos/CascabelHead.png \
+		../../Recursos/MenuJugar.png \
+		../../Recursos/PezLvl3.png \
+		../../Recursos/PlayButton.png \
+		../../Recursos/CascabelColaLeft.png \
+		../../Recursos/MenuPantalla.png \
+		../../Recursos/nivel2boton.png \
+		../../Recursos/GanasteLvl1.png \
+		../../Recursos/BoaHeadLeft.png \
+		../../Recursos/NodoLvl2.png \
 		../../Recursos/PerdisteLvl3.png \
 		../../Recursos/BoaHead.png \
 		../../Recursos/BoaColaLeft.png \
 		../../Recursos/NodoNaranjaLvl1.png \
+		../../Recursos/NodoNegroLvl3.png \
 		../../Recursos/VolverAMenu.png \
 		../../Recursos/SiguienteNivel.png \
 		../../Recursos/MenuRecords.png \
-		../../Recursos/Pixellari.ttf \
-		../../Recursos/nivel1boton.png \
-		../../Recursos/nivel1background.png \
-		../../Recursos/NodoAmarilloLvl1.png \
 		../../Recursos/BoaCola.png \
-		../../Recursos/PauseVolumen.png \
-		../../Recursos/MenuInstrucciones.png \
-		../../Recursos/SnakeInicio.png \
+		../../Recursos/NodoAmarilloLvl1.png \
 		../../Recursos/MenuAlbum.png \
-		../../Recursos/UsernamePantalla.png \
-		../../Recursos/MenuOpciones.png \
-		../../Recursos/safariboton.png \
 		../../Recursos/CascabelCola.png \
+		../../Recursos/NodoAzulLvl3.png \
 		../../Recursos/Reintentar.png \
 		../../Recursos/nivel3boton.png \
-		../../Recursos/SeguirJugandoPJ.png \
 		../../Recursos/NodoNegroLvl1.png \
+		../../Recursos/PiedraLvl3.png \
 		../../Recursos/PerdisteLvl1.png \
+		../../Recursos/PezGloboLvl3.png \
 		../../Recursos/PauseVolumenLvl2.png \
 		../../Recursos/UsernameConfirmar.png \
-		../../Recursos/PlayVolumen.png \
 		../../Recursos/PlayVolumenLvl2.png \
-		../../Recursos/VerEnAlbum.png
+		../../Recursos/nivel3background.png
 	C:\Qt\6.11.1\mingw_64\bin\rcc.exe -name Recursos --no-zstd ..\..\Recursos.qrc -o release\qrc_Recursos.cpp
 
 compiler_moc_predefs_make_all: release/moc_predefs.h
@@ -416,6 +433,7 @@ release/moc_mainwindow.cpp: ../../mainwindow.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QLabel \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qlabel.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpicture.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/QString \
 		../../gestorarchivos.h \
 		../../tablero.h \
 		../../serpiente.h \
@@ -684,6 +702,7 @@ release/main.o: ../../main.cpp ../../mainwindow.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QLabel \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qlabel.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpicture.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/QString \
 		../../gestorarchivos.h \
 		../../tablero.h \
 		../../serpiente.h \
@@ -925,6 +944,7 @@ release/mainwindow.o: ../../mainwindow.cpp ../../mainwindow.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/QLabel \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtWidgets/qlabel.h \
 		../../../../../../Qt/6.11.1/mingw_64/include/QtGui/qpicture.h \
+		../../../../../../Qt/6.11.1/mingw_64/include/QtCore/QString \
 		../../gestorarchivos.h \
 		../../tablero.h \
 		../../serpiente.h \

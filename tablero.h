@@ -20,6 +20,7 @@ public:
     bool dentroDelMapa(int fila, int columna) const;
 
     void generarMurosPerimetro();
+    void generarBloquesInternos();
 
 private:
     int **mapa;
