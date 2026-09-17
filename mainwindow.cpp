@@ -570,22 +570,27 @@ void MainWindow::actualizarJuego()
             origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual,
             origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual
             );
-
         if (frutasComidas >= metaFrutasNivel) {
             timerJuego->stop();
             timerReloj->stop();
             bool esRecordNuevo = (frutasComidas > jugadorActual.puntajeMaximo);
             if (frutasComidas > jugadorActual.puntajeMaximo) jugadorActual.puntajeMaximo = frutasComidas;
             if (segundosTranscurridos > jugadorActual.tiempoMaximo) jugadorActual.tiempoMaximo = segundosTranscurridos;
-            if (jugadorActual.nivelMaximoAlcanzado < 2) jugadorActual.nivelMaximoAlcanzado = 2;
+
+            if (nivelJugadoActual == 1 && jugadorActual.nivelMaximoAlcanzado < 2) jugadorActual.nivelMaximoAlcanzado = 2;
+            if (nivelJugadoActual == 2 && jugadorActual.nivelMaximoAlcanzado < 3) jugadorActual.nivelMaximoAlcanzado = 3;
+
             gestorArchivos->actualizarJugador(jugadorActual);
-            mostrarVictoria(1, frutasComidas, vidasRestantes, segundosTranscurridos, esRecordNuevo);
+            mostrarVictoria(nivelJugadoActual, frutasComidas, vidasRestantes, segundosTranscurridos, esRecordNuevo);
         }
     }
 
     contadorPowerUp++;
 
     if (!powerUpVisible && contadorPowerUp >= TICKS_ESPERA_RANA) {
+        int variante = rand() % cantidadVariantesPowerUp;
+        rutaSpritePowerUp = rutasPowerUpVariantes[variante];
+        tipoEfectoPowerUp = tiposPowerUpVariantes[variante];
         powerUpJuego.generarNuevaPosicionForzada(tableroJuego, serpienteJuego, ESPECIAL);
         int intentos = 0;
         while (powerUpJuego.getX() == comidaJuego.getX() && powerUpJuego.getY() == comidaJuego.getY() && intentos < 10) {
@@ -644,6 +649,9 @@ void MainWindow::actualizarJuego()
                     qDebug() << "¡Pez globo! Encogiste 2 segmentos";
                 }
             }
+        } else if (tipoEfectoPowerUp == 2) { // Pez payaso: escudo de un solo uso
+            serpienteJuego.activarEscudo();
+            qDebug() << "¡Escudo activado!";
         }
 
         escenaJuego->removeItem(itemPowerUp);
@@ -666,10 +674,8 @@ void MainWindow::actualizarJuego()
     bool chocoConsigoMisma = serpienteJuego.chocaConsigoMisma();
     if (chocoConMuro || chocoConsigoMisma) {
         if (nivelJugadoActual == 1) {
-            // Nivel 1: sistema de vidas (el muro nunca dispara aquí, es modo infinito)
             vidasRestantes--;
             lblValorVidas->setText(QString::number(vidasRestantes));
-
             if (vidasRestantes <= 0) {
                 finalizarPartidaPorDerrota("Chocaste contigo mismo");
                 return;
@@ -677,10 +683,13 @@ void MainWindow::actualizarJuego()
                 serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2);
             }
         } else {
-            // Nivel 2 y 3: muerte instantánea, sin vidas de por medio
-            QString razon = chocoConMuro ? "Chocaste contra un muro" : "Chocaste contigo mismo";
-            finalizarPartidaPorDerrota(razon);
-            return;
+            if (serpienteJuego.consumirEscudo()) {
+                qDebug() << "¡Escudo absorbió el golpe!";
+            } else {
+                QString razon = chocoConMuro ? "Chocaste contra un muro" : "Chocaste contigo mismo";
+                finalizarPartidaPorDerrota(razon);
+                return;
+            }
         }
     }
     redibujarSerpiente();
@@ -833,6 +842,12 @@ void MainWindow::iniciarNivel1()
     if (cicloColoresNivel != nullptr) {
         delete[] cicloColoresNivel;
     }
+    if (rutasPowerUpVariantes != nullptr) { delete[] rutasPowerUpVariantes; delete[] tiposPowerUpVariantes; }
+    cantidadVariantesPowerUp = 1;
+    rutasPowerUpVariantes = new QString[1];
+    tiposPowerUpVariantes = new int[1];
+    rutasPowerUpVariantes[0] = ":/Recursos/RanaLvl1.png";
+    tiposPowerUpVariantes[0] = 0;
     powerUpVisible = false;
     contadorPowerUp = 0;
     itemPowerUp = nullptr;
@@ -923,6 +938,13 @@ void MainWindow::iniciarNivel2()
 
     ranaVisible = false; powerUpVisible = false; contadorPowerUp = 0; itemPowerUp = nullptr;
     ralentizadoActivo = false; contadorRalentizado = 0;
+
+    if (rutasPowerUpVariantes != nullptr) { delete[] rutasPowerUpVariantes; delete[] tiposPowerUpVariantes; }
+    cantidadVariantesPowerUp = 1;
+    rutasPowerUpVariantes = new QString[1];
+    tiposPowerUpVariantes = new int[1];
+    rutasPowerUpVariantes[0] = ":/Recursos/RatonLvl2.png";
+    tiposPowerUpVariantes[0] = 0;
     rutaSpritePowerUp = ":/Recursos/RatonLvl2.png";
     tipoEfectoPowerUp = 1;
 
@@ -999,7 +1021,7 @@ void MainWindow::inicializarBloquesMoviles()
 
         tableroJuego.asignarValor(y, x, 1); // se marca como muro en la matriz lógica
 
-        QPixmap pixmapBloque(":/Recursos/PiedraLvl3.png");
+        QPixmap pixmapBloque(":/Recursos/RocaLvl3.png");
         pixmapBloque = pixmapBloque.scaled(tamanoCeldaActual, tamanoCeldaActual, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         bloquesMoviles[i].sprite = escenaJuego->addPixmap(pixmapBloque);
         bloquesMoviles[i].sprite->setZValue(1);
@@ -1058,11 +1080,14 @@ void MainWindow::iniciarNivel3()
     rutaColaI = ":/Recursos/MarinaTail.png";
 
     ranaVisible = false; powerUpVisible = false; contadorPowerUp = 0; itemPowerUp = nullptr;
-    rutaSpritePowerUp = ":/Recursos/PezLvl3.png";
-    tipoEfectoPowerUp = 2; // escudo
-    rutaSpritePowerUp = ":/Recursos/PezGloboLvl3.png"; // usa el nombre real de tu archivo
-    tipoEfectoPowerUp = 3; // pez globo: cambia tamaño al azar
-
+    if (rutasPowerUpVariantes != nullptr) { delete[] rutasPowerUpVariantes; delete[] tiposPowerUpVariantes; }
+    cantidadVariantesPowerUp = 2;
+    rutasPowerUpVariantes = new QString[2];
+    tiposPowerUpVariantes = new int[2];
+    rutasPowerUpVariantes[0] = ":/Recursos/PezLvl3.png";       // pez payaso: escudo
+    tiposPowerUpVariantes[0] = 2;
+    rutasPowerUpVariantes[1] = ":/Recursos/PezGloboLvl3.png";  // pez globo: crece/encoge
+    tiposPowerUpVariantes[1] = 3;
     origenXCuadricula = 12;
     origenYCuadricula = 104;
     tamanoCeldaActual = 40;
@@ -1075,7 +1100,6 @@ void MainWindow::iniciarNivel3()
 
     tableroJuego.configurarNivel(19, 14, 40);
     tableroJuego.generarMurosPerimetro();
-    // TODO: bloques móviles internos, pendiente para una siguiente sesión
 
     serpienteJuego.inicializar(9, 7);
     comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
@@ -1084,7 +1108,7 @@ void MainWindow::iniciarNivel3()
     QGraphicsPixmapItem *fondo = escenaJuego->addPixmap(QPixmap(":/Recursos/nivel3background.png"));
     fondo->setPos(0, 0);
     dibujarGridPermanente(QColor(255, 255, 255, 100));
-    dibujarMuros(":/Recursos/PiedraLvl3.png");
+    dibujarMuros(":/Recursos/RocaLvl3.png");
     fondo->setZValue(-1);
 
     QPixmap pixmapComidaInicial(":/Recursos/ManzanaLvl3.png");
@@ -1195,7 +1219,11 @@ void MainWindow::mostrarVictoria(int nivel, int manzanas, int vidas, int segundo
     fondoVictoria->setGeometry(0, 0, 800, 700);
 
     lblManzanasVictoria->setText(QString::number(manzanas));
-    lblVidasVictoria->setText(QString::number(vidas));
+    if (nivel == 1) {
+        lblVidasVictoria->setText(QString::number(vidas));
+    } else {
+        lblVidasVictoria->setText("-");
+    }
 
     int minutos = segundos / 60;
     int segs = segundos % 60;

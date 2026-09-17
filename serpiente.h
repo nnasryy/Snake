@@ -16,11 +16,14 @@ public:
     void crecer();                                 // agrega un segmento nuevo tras comer
     bool chocaConsigoMisma() const;                // revisa auto-colisión
     void cambiarDireccion(Direccion nuevaDireccion);
+    void activarEscudo();
+    bool consumirEscudo();
 
     void encoger(int cantidad);          // quita segmentos del final (rana)
     Direccion getDireccion() const;    // revisa y gasta el escudo si estaba activo
     Nodo* getCabeza() const;
     int getLongitud() const;
+    bool escudoActivo;
 
 private:
     Nodo* cabeza;

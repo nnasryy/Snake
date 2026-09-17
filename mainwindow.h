@@ -113,9 +113,13 @@ private:
     QString rutaCabezaI;
     QString rutaColaD;
     QString rutaColaI;
-    int intervaloBaseNivel2;      // velocidad "real" según el progreso, sin contar el power-up de ratón
+    int intervaloBaseNivel2;
+    QString* rutasPowerUpVariantes = nullptr;
+    int* tiposPowerUpVariantes = nullptr;
+    int cantidadVariantesPowerUp = 0;    // velocidad "real" según el progreso, sin contar el power-up de ratón
     static const int INTERVALO_MINIMO_NIVEL2 = 90; // no dejar que se vuelva injugable
     void iniciarNivel3();
+
 
 
     QGraphicsPixmapItem *itemComida;
