@@ -733,20 +733,18 @@ void MainWindow::actualizarJuego()
                 ralentizadoActivo = true;
                 contadorRalentizado = 0;
             }
-        } else if (tipoEfectoPowerUp == 3) { // PEZ GLOBO CRECE O ENCOGE SNAKE
-            if (rand() % 2 == 0) {
-                serpienteJuego.crecer();
-                serpienteJuego.crecer();
-                qDebug() << "¡Pez globo! Creciste 2 segmentos";
+        } else if (tipoEfectoPowerUp == 3) { // PEZ GLOBO: crece 2 segmentos
+            serpienteJuego.crecer();
+            serpienteJuego.crecer();
+            qDebug() << "¡Pez globo! Creciste 2 segmentos";
+        } else if (tipoEfectoPowerUp == 2) { // PEZ PAYASO: quita 2 segmentos, o mata si ya no puede
+            if (serpienteJuego.getLongitud() <= LONGITUD_MINIMA_SEGURA) {
+                finalizarPartidaPorDerrota("Te quedaste sin cuerpo suficiente");
+                return;
             } else {
-                if (serpienteJuego.getLongitud() > LONGITUD_MINIMA_SEGURA) {
-                    serpienteJuego.encoger(2);
-                    qDebug() << "¡Pez globo! Encogiste 2 segmentos";
-                }
+                serpienteJuego.encoger(2);
+                qDebug() << "¡Pez payaso! Perdiste 2 segmentos";
             }
-        } else if (tipoEfectoPowerUp == 2) { // Pez payaso: escudo de un solo uso
-            serpienteJuego.activarEscudo();
-            qDebug() << "¡Escudo activado!";
         }
 
         escenaJuego->removeItem(itemPowerUp);

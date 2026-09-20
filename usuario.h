@@ -8,15 +8,20 @@ class Usuario
 public:
     Usuario();
     Usuario(std::string nombreInicial);
-    virtual ~Usuario(); // destructor virtual: buena práctica al tener herencia
+    virtual ~Usuario();
 
     std::string getNombre() const;
     void setNombre(std::string nuevoNombre);
 
-    virtual void mostrarInfo() const; // se puede sobreescribir en clases hijas
+    std::string getContrasena() const;
+    void setContrasena(std::string nuevaContrasena);
+    bool verificarContrasena(std::string intento) const;
+    static bool esContrasenaValida(std::string contrasena);
+    virtual void mostrarInfo() const; // virtual: Jugador la sobreescribe con "override"
 
 protected:
-    std::string nombre; // protected: las clases hijas pueden acceder directo
+    std::string nombre;
+    std::string contrasena;
 };
 
 #endif

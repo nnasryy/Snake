@@ -18,7 +18,6 @@ public:
     void cambiarDireccion(Direccion nuevaDireccion);
     void activarEscudo();
     bool consumirEscudo();
-
     void encoger(int cantidad);          // quita segmentos del final (rana)
     Direccion getDireccion() const;    // revisa y gasta el escudo si estaba activo
     Nodo* getCabeza() const;

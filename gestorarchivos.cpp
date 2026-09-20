@@ -19,23 +19,35 @@ void GestorArchivos::cargarDesdeArchivo()
 
     std::string linea;
     while (std::getline(archivo, linea)) {
-        std::stringstream ss(linea);
-        std::string campo, nombreLeido;
+        if (linea.empty()) continue; // ignora líneas vacías
 
-        std::getline(ss, nombreLeido, '|');
-        Jugador j(nombreLeido); // constructor con nombre
+        try {
+            std::stringstream ss(linea);
+            std::string campo, nombreLeido;
+            std::string passLeida;
 
-        std::getline(ss, campo, '|');
-        int puntaje = std::stoi(campo);
-        std::getline(ss, campo, '|');
-        int tiempo = std::stoi(campo);
-        std::getline(ss, campo, '|');
-        int nivel = std::stoi(campo);
+            std::getline(ss, nombreLeido, '|');
+            if (nombreLeido.empty()) continue;
+            Jugador j(nombreLeido);
 
-        j.actualizarRecord(puntaje, tiempo);
-        j.desbloquearNivel(nivel);
+            std::getline(ss, campo, '|');
+            int puntaje = std::stoi(campo);
+            std::getline(ss, campo, '|');
+            int tiempo = std::stoi(campo);
+            std::getline(ss, campo, '|');
+            int nivel = std::stoi(campo);
+            std::getline(ss, passLeida, '|');
+            j.setContrasena(passLeida);
 
-        jugadores.push_back(j);
+
+
+            j.actualizarRecord(puntaje, tiempo);
+            j.desbloquearNivel(nivel);
+
+            jugadores.push_back(j);
+        } catch (...) {
+            continue; // línea corrupta, la saltamos en vez de tronar la app
+        }
     }
     archivo.close();
 }
@@ -45,7 +57,8 @@ void GestorArchivos::guardarEnArchivo()
     std::ofstream archivo(ruta, std::ios::trunc);
     for (const auto &j : jugadores) {
         archivo << j.getNombre() << "|" << j.getPuntajeMaximo() << "|"
-                << j.getTiempoMaximo() << "|" << j.getNivelMaximoAlcanzado() << std::endl;
+                << j.getTiempoMaximo() << "|" << j.getNivelMaximoAlcanzado() << "|"
+                << j.getContrasena() << std::endl;
     }
     archivo.close();
 }
