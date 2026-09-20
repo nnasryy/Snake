@@ -90,3 +90,10 @@ void Jugador::mostrarInfo() const
     std::cout << "Jugador: " << nombre << " | Puntaje: " << puntajeMaximo
               << " | Nivel: " << nivelMaximoAlcanzado << std::endl;
 }
+QString Jugador::getMedallaSafari() const
+{
+    if (cantidadSafarisCompletados >= 10) return "Oro";
+    if (cantidadSafarisCompletados >= 5)  return "Plata";
+    if (cantidadSafarisCompletados >= 1)  return "Bronce";
+    return "-";
+}

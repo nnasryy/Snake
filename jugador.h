@@ -1,6 +1,7 @@
 #ifndef JUGADOR_H
 #define JUGADOR_H
 
+#include <QString>
 #include "usuario.h"
 
 class Jugador : public Usuario // herencia pública
@@ -28,6 +29,7 @@ public:
     bool haCompletadoNivel(int nivel) const;  // true si ya ganó ese nivel al menos una vez
     void registrarSafariCompletado();
     int getCantidadSafarisCompletados() const;
+    QString getMedallaSafari() const;
 
 
     void mostrarInfo() const override; // polimorfismo: versión especializada

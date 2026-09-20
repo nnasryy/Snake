@@ -761,13 +761,14 @@ void MainWindow::actualizarJuego()
                 jugadorActual.registrarNivelCompletado(nivelJugadoActual);
                 gestorArchivos->actualizarJugador(jugadorActual);
                 mostrarVictoria(nivelJugadoActual, frutasComidas, vidasRestantes, segundosTranscurridos, esRecordNuevo);
+                return;
             }
         }
     }
 
     contadorPowerUp++;
 
-    if (!powerUpVisible && contadorPowerUp >= TICKS_ESPERA_RANA) {
+    if (cantidadVariantesPowerUp > 0 && !powerUpVisible && contadorPowerUp >= TICKS_ESPERA_RANA) {
         int variante = rand() % cantidadVariantesPowerUp;
         rutaSpritePowerUp = rutasPowerUpVariantes[variante];
         tipoEfectoPowerUp = tiposPowerUpVariantes[variante];
@@ -851,32 +852,22 @@ void MainWindow::actualizarJuego()
     bool chocoConMuro = (!modoInfinitoActual && tableroJuego.obtenerValor(cabeza->y, cabeza->x) == 1);
     bool chocoConsigoMisma = serpienteJuego.chocaConsigoMisma();
     if (chocoConMuro || chocoConsigoMisma) {
-        if (modoSafariActivo) {
-            vidasRestantes--;
-            lblValorVidas->setText(QString::number(vidasRestantes));
-            if (vidasRestantes <= 0) {
-                finalizarSafariPorDerrota();
-                return;
-            } else {
-                serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2);
-            }
-        } else if (nivelJugadoActual == 1) {
-            vidasRestantes--;
-            lblValorVidas->setText(QString::number(vidasRestantes));
-            if (vidasRestantes <= 0) {
-                finalizarPartidaPorDerrota("Chocaste contigo mismo");
-                return;
-            } else {
-                serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2);
-            }
+        if (serpienteJuego.consumirEscudo()) {
+            qDebug() << "¡Escudo absorbió el golpe!";
+            serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2);
         } else {
-            if (serpienteJuego.consumirEscudo()) {
-                qDebug() << "¡Escudo absorbió el golpe!";
-                serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2); // <- agrega esta línea
-            }else {
-                QString razon = chocoConMuro ? "Chocaste contra un muro" : "Chocaste contigo mismo";
-                finalizarPartidaPorDerrota(razon);
+            vidasRestantes--;
+            lblValorVidas->setText(QString::number(vidasRestantes));
+            if (vidasRestantes <= 0) {
+                if (modoSafariActivo) {
+                    finalizarSafariPorDerrota();
+                } else {
+                    QString razon = chocoConMuro ? "Chocaste contra un muro" : "Chocaste contigo mismo";
+                    finalizarPartidaPorDerrota(razon);
+                }
                 return;
+            } else {
+                serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2);
             }
         }
     }
@@ -1066,7 +1057,7 @@ void MainWindow::dibujarMuros(QString rutaSpriteMuro)
 void MainWindow::iniciarNivel2()
 {
     modoSafariActivo = false;
-    intervaloBaseNivel2 = 200;
+    intervaloBaseNivel2 = 180;
 
     ConfiguracionNivel config;
     config.establecer(2, 17, 12, 45, 10, false, intervaloBaseNivel2, 11, 101,
@@ -1081,7 +1072,7 @@ void MainWindow::iniciarNivel2()
     int tiposPU[1] = { 1 };
     config.establecerPowerUps(rutasPU, tiposPU, 1);
 
-    config.establecerVidas(false, 0);
+   config.establecerVidas(true, 3);
     config.establecerMuro(":/Recursos/RocaLvl2.png", true);
     config.establecerColorGrid(QColor(255, 255, 255, 100));
     config.establecerHUD(QColor(52, 16, 3),
@@ -1155,7 +1146,7 @@ void MainWindow::iniciarNivel3()
     int tiposPU[2] = { 2, 3 };
     config.establecerPowerUps(rutasPU, tiposPU, 2);
 
-    config.establecerVidas(false, 0);
+    config.establecerVidas(true, 3);
     config.establecerMuro(":/Recursos/RocaLvl3.png", false);
     config.establecerBloquesMoviles(true);
     config.establecerColorGrid(QColor(255, 255, 255, 100));
@@ -1458,11 +1449,7 @@ void MainWindow::mostrarVictoria(int nivel, int manzanas, int vidas, int segundo
     fondoVictoria->setGeometry(0, 0, 800, 700);
 
     lblManzanasVictoria->setText(QString::number(manzanas));
-    if (nivel == 1) {
-        lblVidasVictoria->setText(QString::number(vidas));
-    } else {
-        lblVidasVictoria->setText("-");
-    }
+    lblVidasVictoria->setText(QString::number(vidas));
 
     int minutos = segundos / 60;
     int segs = segundos % 60;
@@ -1474,6 +1461,7 @@ void MainWindow::mostrarVictoria(int nivel, int manzanas, int vidas, int segundo
 
     stack->setCurrentWidget(paginaVictoria);
 }
+
 void MainWindow::crearPaginaDerrota()
 {
     paginaDerrota = new QWidget();
@@ -1621,7 +1609,9 @@ void MainWindow::mostrarRanking(int tab)
         int nivel = tab + 1;
         std::vector<Jugador> ranking = gestorArchivos->obtenerRankingNivel(nivel, 10);
         for (int i = 0; i < (int)ranking.size(); i++) {
+            if (!ranking[i].haCompletadoNivel(nivel)) continue;
             int tiempo = ranking[i].getTiempoNivel(nivel);
+            if (tiempo <= 0) continue;
             int minutos = tiempo / 60;
             int segundos = tiempo % 60;
             QString texto = QString("%1. %2 — %3:%4")
@@ -1641,10 +1631,11 @@ void MainWindow::mostrarRanking(int tab)
     } else {
         std::vector<Jugador> ranking = gestorArchivos->obtenerRankingSafari(10);
         for (int i = 0; i < (int)ranking.size(); i++) {
-            QString texto = QString("%1. %2 — %3 Safaris completados")
+            QString texto = QString("%1. %2 — %3 Modos Safari completados (%4)")
                                 .arg(i + 1)
                                 .arg(QString::fromStdString(ranking[i].getNombre()))
-                                .arg(ranking[i].getCantidadSafarisCompletados());
+                                .arg(ranking[i].getCantidadSafarisCompletados())
+                                .arg(ranking[i].getMedallaSafari());
             QLabel *fila = new QLabel(texto, contenedorFilasRanking);
             fila->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 20px;").arg(familiaFuente));
             layoutFilasRanking->addWidget(fila);
