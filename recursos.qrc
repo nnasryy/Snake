@@ -19,9 +19,7 @@
         <file>Recursos/nivel3boton.png</file>
         <file>Recursos/safariboton.png</file>
         <file>Recursos/RanaLvl1.png</file>
-        <file>Recursos/NodoAmarilloLvl1.png</file>
         <file>Recursos/NodoNaranjaLvl1.png</file>
-        <file>Recursos/NodoNegroLvl1.png</file>
         <file>Recursos/nivel1background.png</file>
         <file>Recursos/Manzana.png</file>
         <file>Recursos/BoaCola.png</file>
@@ -78,5 +76,30 @@
         <file>Recursos/UsernamePantalla.png</file>
         <file>Recursos/PassClosed.png</file>
         <file>Recursos/PassOpened.png</file>
+        <file>Recursos/CascabelHeadLeftSafari.png</file>
+        <file>Recursos/CascabelHeadSafari.png</file>
+        <file>Recursos/EsmeraldaHeadLeftSafari.png</file>
+        <file>Recursos/EsmeraldaHeadSafari.png</file>
+        <file>Recursos/EsmeraldaNodoSafari.png</file>
+        <file>Recursos/ManzanaSafari.png</file>
+        <file>Recursos/SafariSetupBackground.png</file>
+        <file>Recursos/MarinaHeadLeftSafari.png</file>
+        <file>Recursos/MarinaHeadSafari.png</file>
+        <file>Recursos/SafariBackground.png</file>
+        <file>Recursos/NodoAzulLvl3Safari.png</file>
+        <file>Recursos/NodoLvl2Safari.png</file>
+        <file>Recursos/NodoNegroLvl3Safari.png</file>
+        <file>Recursos/PezPayasoSafari.png</file>
+        <file>Recursos/RatonSafari.png</file>
+        <file>Recursos/PezGloboSafari.png</file>
+        <file>Recursos/EsmeraldaColaLeftSafari.png</file>
+        <file>Recursos/EsmeraldaColaSafari.png</file>
+        <file>Recursos/CascabelColaLeftSafari.png</file>
+        <file>Recursos/CascabelColaSafari.png</file>
+        <file>Recursos/MarinaColaLeftSafari.png</file>
+        <file>Recursos/MarinaColaSafari.png</file>
+        <file>Recursos/NodoNegroLvl1.png</file>
+        <file>Recursos/NodoAmarilloLvl1.png</file>
+        <file>Recursos/RocaSafari.png</file>
     </qresource>
 </RCC>

@@ -57,6 +57,9 @@ void GestorArchivos::cargarDesdeArchivo()
             int t3 = campo.empty() ? -1 : std::stoi(campo);
             std::getline(ss, campo, '|');
             int pSafari = campo.empty() ? 0 : std::stoi(campo);
+            std::getline(ss, campo, '|');
+            int safarisCompletados = campo.empty() ? 0 : std::stoi(campo);
+            for (int i = 0; i < safarisCompletados; i++) j.registrarSafariCompletado();
 
             if (t1 != -1) j.actualizarRecordNivel(1, t1);
             if (t2 != -1) j.actualizarRecordNivel(2, t2);
@@ -76,7 +79,9 @@ void GestorArchivos::guardarEnArchivo()
     for (const auto &j : jugadores) {
         archivo << j.getNombre() << "|" << j.getPuntajeMaximo() << "|"
                 << j.getTiempoMaximo() << "|" << j.getNivelMaximoAlcanzado() << "|"
-                << j.getContrasena() << "|" << j.getMejorNivelCompletado() << std::endl;
+                << j.getContrasena() << "|" << j.getMejorNivelCompletado() << "|"
+                << j.getCantidadSafarisCompletados() << std::endl;
+
     }
     archivo.close();
 }
@@ -152,13 +157,13 @@ std::vector<Jugador> GestorArchivos::obtenerRankingNivel(int nivel, int cantidad
 
 std::vector<Jugador> GestorArchivos::obtenerRankingSafari(int cantidad)
 {
-    std::vector<Jugador> conPuntaje;
+    std::vector<Jugador> conMedallas;
     for (const auto &j : jugadores) {
-        if (j.getPuntajeSafari() > 0) conPuntaje.push_back(j);
+        if (j.getCantidadSafarisCompletados() > 0) conMedallas.push_back(j);
     }
-    std::sort(conPuntaje.begin(), conPuntaje.end(), [](const Jugador &a, const Jugador &b) {
-        return a.getPuntajeSafari() > b.getPuntajeSafari(); // mayor puntaje primero
+    std::sort(conMedallas.begin(), conMedallas.end(), [](const Jugador &a, const Jugador &b) {
+        return a.getCantidadSafarisCompletados() > b.getCantidadSafarisCompletados();
     });
-    if ((int)conPuntaje.size() > cantidad) conPuntaje.resize(cantidad);
-    return conPuntaje;
+    if ((int)conMedallas.size() > cantidad) conMedallas.resize(cantidad);
+    return conMedallas;
 }

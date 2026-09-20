@@ -45,7 +45,10 @@ MainWindow::MainWindow(QWidget *parent)
     crearPaginaVictoria();
     crearPaginaDerrota();
     crearPaginaAlbums();
+    crearPaginaSafariSetup();
+    crearPaginaRanking();
     for (int nivel = 1; nivel <= 3; nivel++) crearPaginaAlbumNivel(nivel);
+
 
     resize(800, 700);
     setWindowTitle("Snake Avanzado");
@@ -306,8 +309,10 @@ void MainWindow::crearPaginaMenuPrincipal()
     btnRecords->setFlat(true);
     btnRecords->setStyleSheet("border: none; background: transparent;");
 
-    connect(btnRecords, &QPushButton::clicked, this, [](){
-        qDebug() << "Botón Récords presionado (pantalla pendiente)";
+    connect(btnRecords, &QPushButton::clicked, this, [this](){
+        mostrarRanking(0);
+        btnTabRanking[0]->setChecked(true);
+        stack->setCurrentWidget(paginaRanking);
     });
 
     QPushButton *btnOpciones = new QPushButton(paginaMenuPrincipal);
@@ -405,6 +410,15 @@ void MainWindow::crearPaginaJuego()
     overlayPausa->setGeometry(200, 200, 400, 260);
     overlayPausa->setStyleSheet("background-color: rgba(15, 58, 13, 230); border: 5px solid rgb(143, 208, 53);");
     overlayPausa->setVisible(false);
+    lblToastSafari = new QLabel(paginaJuego);
+    lblToastSafari->setGeometry(150, 300, 500, 100);
+    lblToastSafari->setAlignment(Qt::AlignCenter);
+    lblToastSafari->setWordWrap(true);
+    lblToastSafari->setStyleSheet(QString(
+                                      "background-color: rgba(15,58,13,230); color: white; border: 4px solid rgb(143,208,53);"
+                                      "font-family: '%1'; font-size: 20px;"
+                                      ).arg(familiaFuente));
+    lblToastSafari->setVisible(false);
 
     btnToggleMusica = new QPushButton(overlayPausa);
     btnToggleMusica->setCheckable(true);
@@ -708,43 +722,46 @@ void MainWindow::actualizarJuego()
     Nodo* cabeza = serpienteJuego.getCabeza();
 
     if (cabeza->x == comidaJuego.getX() && cabeza->y == comidaJuego.getY()) {
-        if (nivelJugadoActual == 3) {
-            serpienteJuego.crecer();
-            serpienteJuego.crecer(); // dos segmentos de golpe
-        } else {
-            serpienteJuego.crecer();
-        }
+        serpienteJuego.crecer();
+        if (nivelJugadoActual == 3) serpienteJuego.crecer();
         frutasComidas++;
-        if (nivelJugadoActual == 2 && frutasComidas % 2 == 0) {
-            intervaloBaseNivel2 = std::max(INTERVALO_MINIMO_NIVEL2, intervaloBaseNivel2 - 10);
-
-            if (!ralentizadoActivo) {
-                // Solo aplicamos el cambio de inmediato si el ratón no está alterando la velocidad ahora mismo
-                timerJuego->setInterval(intervaloBaseNivel2);
-            }
+        comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
+        int intentosComida = 0;
+        while (powerUpVisible && comidaJuego.getX() == powerUpJuego.getX() && comidaJuego.getY() == powerUpJuego.getY() && intentosComida < 10) {
+            comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
+            intentosComida++;
         }
-        lblValorPuntos->setText(QString::number(frutasComidas) + "/" + QString::number(metaFrutasNivel));
-
-        comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego); // siempre NORMAL ahora
-
         QPixmap pixmapComida(":/Recursos/Manzana.png");
         pixmapComida = pixmapComida.scaled(tamanoCeldaActual, tamanoCeldaActual, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         itemComida->setPixmap(pixmapComida);
-        itemComida->setPos(
-            origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual,
-            origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual
-            );
-        if (frutasComidas >= metaFrutasNivel) {
-            timerJuego->stop();
-            timerReloj->stop();
-            bool esRecordNuevo = (frutasComidas > jugadorActual.getPuntajeMaximo());
-            jugadorActual.actualizarRecord(frutasComidas, segundosTranscurridos);
-            if (nivelJugadoActual == 1) jugadorActual.desbloquearNivel(2);
-            if (nivelJugadoActual == 2) jugadorActual.desbloquearNivel(3);
-            jugadorActual.registrarNivelCompletado(nivelJugadoActual);
-            jugadorActual.actualizarRecordNivel(nivelJugadoActual, segundosTranscurridos);
-            gestorArchivos->actualizarJugador(jugadorActual);
-            mostrarVictoria(nivelJugadoActual, frutasComidas, vidasRestantes, segundosTranscurridos, esRecordNuevo);
+        itemComida->setPos(origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual, origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual);
+
+        if (modoSafariActivo) {
+            lblValorPuntos->setText("Frutas: " + QString::number(frutasComidas));
+            if (frutasComidas % 15 == 0) {
+                jugadorActual.registrarSafariCompletado();
+                gestorArchivos->actualizarJugador(jugadorActual);
+                mostrarToastSafari("¡Safari completado!\nTotal: " + QString::number(jugadorActual.getCantidadSafarisCompletados()));
+            }
+        } else {
+            if (nivelJugadoActual == 2 && frutasComidas % 2 == 0) {
+                intervaloBaseNivel2 = std::max(INTERVALO_MINIMO_NIVEL2, intervaloBaseNivel2 - 10);
+                if (!ralentizadoActivo) timerJuego->setInterval(intervaloBaseNivel2);
+            }
+            lblValorPuntos->setText(QString::number(frutasComidas) + "/" + QString::number(metaFrutasNivel));
+
+            if (frutasComidas >= metaFrutasNivel) {
+                timerJuego->stop();
+                timerReloj->stop();
+                bool esRecordNuevo = (frutasComidas > jugadorActual.getPuntajeMaximo());
+                jugadorActual.actualizarRecord(frutasComidas, segundosTranscurridos);
+                jugadorActual.actualizarRecordNivel(nivelJugadoActual, segundosTranscurridos);
+                if (nivelJugadoActual == 1) jugadorActual.desbloquearNivel(2);
+                if (nivelJugadoActual == 2) jugadorActual.desbloquearNivel(3);
+                jugadorActual.registrarNivelCompletado(nivelJugadoActual);
+                gestorArchivos->actualizarJugador(jugadorActual);
+                mostrarVictoria(nivelJugadoActual, frutasComidas, vidasRestantes, segundosTranscurridos, esRecordNuevo);
+            }
         }
     }
 
@@ -834,7 +851,16 @@ void MainWindow::actualizarJuego()
     bool chocoConMuro = (!modoInfinitoActual && tableroJuego.obtenerValor(cabeza->y, cabeza->x) == 1);
     bool chocoConsigoMisma = serpienteJuego.chocaConsigoMisma();
     if (chocoConMuro || chocoConsigoMisma) {
-        if (nivelJugadoActual == 1) {
+        if (modoSafariActivo) {
+            vidasRestantes--;
+            lblValorVidas->setText(QString::number(vidasRestantes));
+            if (vidasRestantes <= 0) {
+                finalizarSafariPorDerrota();
+                return;
+            } else {
+                serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2);
+            }
+        } else if (nivelJugadoActual == 1) {
             vidasRestantes--;
             lblValorVidas->setText(QString::number(vidasRestantes));
             if (vidasRestantes <= 0) {
@@ -903,15 +929,15 @@ void MainWindow::crearPaginaNiveles()
     btnSafari->setGeometry(557, 510, 96, 96);
     btnSafari->setFlat(true);
     btnSafari->setStyleSheet("border: none; background: transparent;");
-
-    bool safariDesbloqueado = jugadorActual.tieneNivelDesbloqueado(2);
-    btnSafari->setEnabled(safariDesbloqueado);
-    if (safariDesbloqueado) {
-        connect(btnSafari, &QPushButton::clicked, this, [this](){
-            qDebug() << "Abriendo Safari (pendiente de implementar)";
-            // más adelante: stack->setCurrentWidget(paginaSafari);
-        });
-    }
+    connect(btnSafari, &QPushButton::clicked, this, [this](){
+        qDebug() << "Botón Safari presionado";
+        for (int i = 1; i <= 3; i++) {
+            QString estado = jugadorActual.haCompletadoNivel(i) ? "SinCandado" : "ConCandado";
+            btnSkinSafari[i]->setIcon(QIcon(QString(":/Recursos/AlbumNivel%1%2.png").arg(i).arg(estado)));
+            btnSkinSafari[i]->setEnabled(jugadorActual.haCompletadoNivel(i));
+        }
+        stack->setCurrentWidget(paginaSafariSetup);
+    });
     QPushButton *btnSalir = new QPushButton(paginaNiveles);
     btnSalir->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
     btnSalir->setIconSize(QSize(278, 70));
@@ -988,10 +1014,19 @@ Direccion MainWindow::calcularDireccionEntreNodos(Nodo* desde, Nodo* hacia)
 
     return DERECHA; // no debería pasar si desde != hacia
 }
-
+bool MainWindow::celdaOcupadaPorSerpiente(int x, int y)
+{
+    Nodo* actual = serpienteJuego.getCabeza();
+    while (actual != nullptr) {
+        if (actual->x == x && actual->y == y) return true;
+        actual = actual->siguiente;
+    }
+    return false;
+}
 
 void MainWindow::iniciarNivel1()
 {
+    modoSafariActivo = false;
     ConfiguracionNivel config;
     config.establecer(1, 14, 10, 50, 10, true, 150, 50, 115,
                       ":/Recursos/nivel1background.png", ":/Recursos/Manzana.png",
@@ -1030,7 +1065,8 @@ void MainWindow::dibujarMuros(QString rutaSpriteMuro)
 }
 void MainWindow::iniciarNivel2()
 {
-    intervaloBaseNivel2 = 170;
+    modoSafariActivo = false;
+    intervaloBaseNivel2 = 200;
 
     ConfiguracionNivel config;
     config.establecer(2, 17, 12, 45, 10, false, intervaloBaseNivel2, 11, 101,
@@ -1088,6 +1124,13 @@ void MainWindow::moverBloquesMoviles()
     for (int i = 0; i < CANTIDAD_BLOQUES_MOVILES; i++) {
         tableroJuego.asignarValor(bloquesMoviles[i].getY(), bloquesMoviles[i].getX(), 0);
         bloquesMoviles[i].mover(tableroJuego.getColumnas(), tableroJuego.getFilas());
+
+        int nx = bloquesMoviles[i].getX();
+        int ny = bloquesMoviles[i].getY();
+        if (celdaOcupadaPorSerpiente(nx, ny)) {
+            bloquesMoviles[i].mover(tableroJuego.getColumnas(), tableroJuego.getFilas());
+        }
+
         tableroJuego.asignarValor(bloquesMoviles[i].getY(), bloquesMoviles[i].getX(), 1);
         bloquesMoviles[i].getSprite()->setPos(
             origenXCuadricula + bloquesMoviles[i].getX() * tamanoCeldaActual,
@@ -1095,8 +1138,10 @@ void MainWindow::moverBloquesMoviles()
             );
     }
 }
+
 void MainWindow::iniciarNivel3()
 {
+    modoSafariActivo = false;
     ConfiguracionNivel config;
     config.establecer(3, 19, 14, 40, 10, false, 100, 12, 104,
                       ":/Recursos/nivel3background.png", ":/Recursos/ManzanaLvl3.png",
@@ -1121,7 +1166,221 @@ void MainWindow::iniciarNivel3()
 
     iniciarNivelConConfiguracion(config);
 }
+void MainWindow::crearPaginaSafariSetup()
+{
+    paginaSafariSetup = new QWidget();
 
+    QLabel *fondo = new QLabel(paginaSafariSetup);
+    fondo->setPixmap(QPixmap(":/Recursos/SafariSetupBackground.png"));
+    fondo->setGeometry(0, 0, 800, 700);
+    fondo->lower();
+
+    // --- Selector de skin (4 opciones, exclusivas) ---
+    grupoSkinSafari = new QButtonGroup(this);
+    grupoSkinSafari->setExclusive(true);
+    const int posXSkin[4] = {40, 220, 400, 580};
+    for (int i = 0; i < 4; i++) {
+        btnSkinSafari[i] = new QPushButton(paginaSafariSetup);
+        btnSkinSafari[i]->setCheckable(true);
+        btnSkinSafari[i]->setIconSize(QSize(150, 150));
+        btnSkinSafari[i]->setGeometry(posXSkin[i], 90, 150, 150);
+        btnSkinSafari[i]->setStyleSheet(
+            "QPushButton { border: 4px solid transparent; background: transparent; }"
+            "QPushButton:checked { border: 4px solid rgb(143,208,53); }"
+            );
+        grupoSkinSafari->addButton(btnSkinSafari[i], i); // id 0=Esmeralda,1=Boa,2=Cascabel,3=Marina
+    }
+    btnSkinSafari[0]->setIcon(QIcon(":/Recursos/EsmeraldaHeadSafari.png"));
+    btnSkinSafari[0]->setEnabled(true); // siempre disponible
+    btnSkinSafari[0]->setChecked(true); // seleccionado por defecto
+
+    // --- Selector de muros (2 opciones, exclusivas) ---
+    grupoMurosSafari = new QButtonGroup(this);
+    grupoMurosSafari->setExclusive(true);
+    QString textosMuros[2] = {"Atravesable", "Mortal"};
+    for (int i = 0; i < 2; i++) {
+        btnMurosSafari[i] = new QPushButton(textosMuros[i], paginaSafariSetup);
+        btnMurosSafari[i]->setCheckable(true);
+        btnMurosSafari[i]->setGeometry(100 + i * 300, 300, 250, 60);
+        btnMurosSafari[i]->setStyleSheet(
+            "QPushButton { background: rgb(15,58,13); color: white; border: 3px solid rgb(143,208,53); font-size: 18px; }"
+            "QPushButton:checked { background: rgb(143,208,53); color: black; }"
+            );
+        grupoMurosSafari->addButton(btnMurosSafari[i], i); // 0=Atravesable, 1=Mortal
+    }
+    btnMurosSafari[0]->setChecked(true);
+
+    // --- Selector de vidas (2 opciones, exclusivas) ---
+    grupoVidasSafari = new QButtonGroup(this);
+    grupoVidasSafari->setExclusive(true);
+    QString textosVidas[2] = {"Normal (3 vidas)", "Hardcore (1 vida)"};
+    for (int i = 0; i < 2; i++) {
+        btnVidasSafari[i] = new QPushButton(textosVidas[i], paginaSafariSetup);
+        btnVidasSafari[i]->setCheckable(true);
+        btnVidasSafari[i]->setGeometry(100 + i * 300, 390, 250, 60);
+        btnVidasSafari[i]->setStyleSheet(
+            "QPushButton { background: rgb(15,58,13); color: white; border: 3px solid rgb(143,208,53); font-size: 16px; }"
+            "QPushButton:checked { background: rgb(143,208,53); color: black; }"
+            );
+        grupoVidasSafari->addButton(btnVidasSafari[i], i); // 0=Normal(3), 1=Hardcore(1)
+    }
+    btnVidasSafari[0]->setChecked(true);
+
+    // --- Checkboxes de power-ups (selección múltiple) ---
+    QString nombresPowerUp[4] = {"Rana", "Ratón", "Pez payaso", "Pez globo"};
+    for (int i = 0; i < 4; i++) {
+        chkPowerUpSafari[i] = new QCheckBox(nombresPowerUp[i], paginaSafariSetup);
+        chkPowerUpSafari[i]->setGeometry(100 + (i % 2) * 300, 470 + (i / 2) * 40, 250, 30);
+        chkPowerUpSafari[i]->setStyleSheet(
+            QString("color: white; font-family: '%1'; font-size: 16px;").arg(familiaFuente)
+            );
+        chkPowerUpSafari[i]->setChecked(true); // todos activos por defecto
+    }
+
+    // --- Botón Jugar ---
+    QPushButton *btnJugarSafari = new QPushButton("JUGAR", paginaSafariSetup);
+    btnJugarSafari->setGeometry(250, 570, 300, 70);
+    btnJugarSafari->setStyleSheet(
+        QString("background: rgb(143,208,53); color: black; font-size: 24px; font-family: '%1'; border-radius: 10px;").arg(familiaFuente)
+        );
+    connect(btnJugarSafari, &QPushButton::clicked, this, [this](){
+        int skin = grupoSkinSafari->checkedId();
+        if (skin != 0 && !jugadorActual.haCompletadoNivel(skin)) return; // seguridad extra
+        iniciarSafari();
+    });
+
+    // --- Botón Volver ---
+    QPushButton *btnVolverSafari = new QPushButton(paginaSafariSetup);
+    btnVolverSafari->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
+    btnVolverSafari->setIconSize(QSize(278, 70));
+    btnVolverSafari->setGeometry(261, 655, 278, 70);
+    btnVolverSafari->setFlat(true);
+    btnVolverSafari->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolverSafari, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaNiveles);
+    });
+
+    stack->addWidget(paginaSafariSetup);
+}
+void MainWindow::iniciarSafari()
+{
+    modoSafariActivo = true;
+    nivelJugadoActual = 0;
+
+    int skin = grupoSkinSafari->checkedId();
+    bool murosMortales = (grupoMurosSafari->checkedId() == 1);
+    int vidasIniciales = (grupoVidasSafari->checkedId() == 0) ? 3 : 1;
+
+    modoInfinitoActual = !murosMortales;
+
+    if (cicloColoresNivel != nullptr) delete[] cicloColoresNivel;
+
+    if (skin == 0) { // Esmeralda, default
+        rutaCabezaD = ":/Recursos/EsmeraldaHeadSafari.png"; rutaCabezaI = ":/Recursos/EsmeraldaHeadLeftSafari.png";
+        rutaColaD = ":/Recursos/EsmeraldaColaLeftSafari.png"; rutaColaI = ":/Recursos/EsmeraldaColaSafari.png";
+        cantidadColoresCiclo = 1;
+        cicloColoresNivel = new QString[1]{":/Recursos/EsmeraldaNodoSafari.png"};
+    } else if (skin == 1) {
+        rutaCabezaD = ":/Recursos/BoaHead.png"; rutaCabezaI = ":/Recursos/BoaHeadLeft.png";
+        rutaColaD = ":/Recursos/BoaColaLeft.png"; rutaColaI = ":/Recursos/BoaCola.png";
+        cantidadColoresCiclo = 3;
+        cicloColoresNivel = new QString[3]{":/Recursos/NodoNegroLvl1.png", ":/Recursos/NodoAmarilloLvl1.png", ":/Recursos/NodoNaranjaLvl1.png"};
+    } else if (skin == 2) {
+        rutaCabezaD = ":/Recursos/CascabelHeadSafari.png"; rutaCabezaI = ":/Recursos/CascabelHeadLeftSafari.png";
+        rutaColaD = ":/Recursos/CascabelColaLeftSafari.png"; rutaColaI = ":/Recursos/CascabelColaSafari.png";
+        cantidadColoresCiclo = 1;
+        cicloColoresNivel = new QString[1]{":/Recursos/NodoLvl2Safari.png"};
+    } else {
+        rutaCabezaD = ":/Recursos/MarinaHeadSafari.png"; rutaCabezaI = ":/Recursos/MarinaHeadLeftSafari.png";
+        rutaColaD = ":/Recursos/MarinaColaSafari.png"; rutaColaI = ":/Recursos/MarinaColaSafari.png";
+        cantidadColoresCiclo = 2;
+        cicloColoresNivel = new QString[2]{":/Recursos/NodoAzulLvl3Safari.png", ":/Recursos/NodoNegroLvl3Safari.png"};
+    }
+
+    // --- Power-ups seleccionados ---
+    QString rutasDisponibles[4] = {":/Recursos/RanaLvl1.png", ":/Recursos/RatonSafari.png", ":/Recursos/PezPayasoSafari.png", ":/Recursos/PezGloboSafari.png"};
+    int tiposDisponibles[4] = {0, 1, 2, 3};
+
+    if (rutasPowerUpVariantes != nullptr) { delete[] rutasPowerUpVariantes; delete[] tiposPowerUpVariantes; }
+    int cantidadSeleccionados = 0;
+    for (int i = 0; i < 4; i++) if (chkPowerUpSafari[i]->isChecked()) cantidadSeleccionados++;
+    if (cantidadSeleccionados == 0) cantidadSeleccionados = 4; // seguridad: si no marcó ninguno, usa los 4
+
+    cantidadVariantesPowerUp = cantidadSeleccionados;
+    rutasPowerUpVariantes = new QString[cantidadSeleccionados];
+    tiposPowerUpVariantes = new int[cantidadSeleccionados];
+    int idx = 0;
+    for (int i = 0; i < 4; i++) {
+        if (chkPowerUpSafari[i]->isChecked() || cantidadSeleccionados == 4) {
+            rutasPowerUpVariantes[idx] = rutasDisponibles[i];
+            tiposPowerUpVariantes[idx] = tiposDisponibles[i];
+            idx++;
+        }
+    }
+
+    powerUpVisible = false; contadorPowerUp = 0; itemPowerUp = nullptr;
+    ralentizadoActivo = false; contadorRalentizado = 0;
+
+    origenXCuadricula = 50; origenYCuadricula = 115; tamanoCeldaActual = 50;
+    frutasComidas = 0;
+    vidasRestantes = vidasIniciales;
+    lblValorVidas->setText(QString::number(vidasRestantes));
+    segundosTranscurridos = 0;
+    lblValorTiempo->setText("00:00");
+
+    tableroJuego.configurarNivel(14, 10, 50);
+    if (murosMortales) tableroJuego.generarMurosPerimetro();
+
+    serpienteJuego.inicializar(7, 5);
+    comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
+
+    escenaJuego->clear();
+    QGraphicsPixmapItem *fondo = escenaJuego->addPixmap(QPixmap(":/Recursos/SafariBackground.png"));
+    fondo->setPos(0, 0);
+    dibujarGridPermanente(QColor(255, 255, 255, 80));
+    if (murosMortales) {
+        dibujarMuros(":/Recursos/RocaSafari.png");
+    }
+    fondo->setZValue(-1);
+
+    QPixmap pixmapComidaInicial(":/Recursos/Manzana.png");
+    pixmapComidaInicial = pixmapComidaInicial.scaled(tamanoCeldaActual, tamanoCeldaActual, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    itemComida = escenaJuego->addPixmap(pixmapComidaInicial);
+    itemComida->setZValue(1);
+    itemComida->setPos(origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual, origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual);
+
+    segmentosVisuales = nullptr;
+    cantidadSegmentosVisuales = 0;
+    redibujarSerpiente();
+
+    lblValorPuntos->setGeometry(131, 59, 200, 40);
+    lblValorPuntos->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 27px;").arg(familiaFuente));
+    lblValorPuntos->setText("Frutas: 0");
+
+    actualizarIconosPausa(":/Recursos/PauseVolumen.png", ":/Recursos/PlayVolumen.png", ":/Recursos/PauseVolumen.png");
+    btnPausaJuego->setGeometry(740, 45, 40, 40);
+
+    timerReloj->start();
+    timerJuego->start(150);
+    vistaJuego->setFocus();
+    stack->setCurrentWidget(paginaJuego);
+}
+void MainWindow::mostrarToastSafari(QString texto)
+{
+    lblToastSafari->setText(texto);
+    lblToastSafari->setVisible(true);
+    lblToastSafari->raise();
+    QTimer::singleShot(2200, this, [this](){ lblToastSafari->setVisible(false); });
+}
+
+void MainWindow::finalizarSafariPorDerrota()
+{
+    timerJuego->stop();
+    timerReloj->stop();
+     modoSafariActivo = false;
+    mostrarToastSafari("Te quedaste sin vidas.\nSafaris completados: " + QString::number(jugadorActual.getCantidadSafarisCompletados()));
+    QTimer::singleShot(2500, this, [this](){ stack->setCurrentWidget(paginaMenuPrincipal); });
+}
 void MainWindow::crearPaginaVictoria()
 {
     paginaVictoria = new QWidget();
@@ -1244,7 +1503,7 @@ void MainWindow::crearPaginaDerrota()
     connect(btnReintentar, &QPushButton::clicked, this, [this](){
         if (nivelJugadoActual == 1) iniciarNivel1();
         else if (nivelJugadoActual == 2) iniciarNivel2();
-        else iniciarNivel3();
+        else if (nivelJugadoActual == 3) iniciarNivel3();
     });
 
     QPushButton *btnVolverMenuDerrota = new QPushButton(paginaDerrota);
@@ -1266,7 +1525,8 @@ void MainWindow::mostrarDerrota(int nivel, QString razon, int manzanas, int segu
 
     QString rutaFondo = (nivel == 1) ? ":/Recursos/PerdisteLvl1.png"
                         : (nivel == 2) ? ":/Recursos/PerdisteLvl2.png"
-                                       : ":/Recursos/PerdisteLvl3.png";
+                        : (nivel == 3) ? ":/Recursos/PerdisteLvl3.png"
+                                       : ":/Recursos/PerdisteLvl1.png"; // fallback seguro, nunca debería llegar aquí en el flujo actual
 
     fondoDerrota->setPixmap(QPixmap(rutaFondo));
     fondoDerrota->setGeometry(0, 0, 800, 700);
@@ -1305,10 +1565,103 @@ void MainWindow::ocultarPausa()
     timerJuego->start();
     timerReloj->start();
 }
+
+void MainWindow::crearPaginaRanking()
+{
+    paginaRanking = new QWidget();
+
+    QLabel *fondo = new QLabel(paginaRanking);
+    fondo->setStyleSheet("background-color: rgb(15,58,13);"); // reemplaza por tu imagen cuando la tengas
+    fondo->setGeometry(0, 0, 800, 700);
+    fondo->lower();
+
+    grupoTabsRanking = new QButtonGroup(this);
+    grupoTabsRanking->setExclusive(true);
+    QString nombresTabs[4] = {"Nivel 1", "Nivel 2", "Nivel 3", "Safari"};
+    for (int i = 0; i < 4; i++) {
+        btnTabRanking[i] = new QPushButton(nombresTabs[i], paginaRanking);
+        btnTabRanking[i]->setCheckable(true);
+        btnTabRanking[i]->setGeometry(20 + i * 195, 20, 180, 50);
+        btnTabRanking[i]->setStyleSheet(
+            "QPushButton { background: rgb(15,58,13); color: white; border: 3px solid rgb(143,208,53); font-size: 16px; }"
+            "QPushButton:checked { background: rgb(143,208,53); color: black; }"
+            );
+        grupoTabsRanking->addButton(btnTabRanking[i], i);
+        connect(btnTabRanking[i], &QPushButton::clicked, this, [this, i](){ mostrarRanking(i); });
+    }
+    btnTabRanking[0]->setChecked(true);
+
+    contenedorFilasRanking = new QWidget(paginaRanking);
+    contenedorFilasRanking->setGeometry(50, 100, 700, 500);
+    layoutFilasRanking = new QVBoxLayout(contenedorFilasRanking);
+    layoutFilasRanking->setAlignment(Qt::AlignTop);
+
+    QPushButton *btnVolverRanking = new QPushButton(paginaRanking);
+    btnVolverRanking->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
+    btnVolverRanking->setIconSize(QSize(278, 70));
+    btnVolverRanking->setGeometry(261, 615, 278, 70);
+    btnVolverRanking->setFlat(true);
+    btnVolverRanking->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolverRanking, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaMenuPrincipal);
+    });
+
+    stack->addWidget(paginaRanking);
+}
+
+void MainWindow::mostrarRanking(int tab)
+{
+    QLayoutItem *item;
+    while ((item = layoutFilasRanking->takeAt(0)) != nullptr) {
+        delete item->widget();
+        delete item;
+    }
+
+    if (tab < 3) {
+        int nivel = tab + 1;
+        std::vector<Jugador> ranking = gestorArchivos->obtenerRankingNivel(nivel, 10);
+        for (int i = 0; i < (int)ranking.size(); i++) {
+            int tiempo = ranking[i].getTiempoNivel(nivel);
+            int minutos = tiempo / 60;
+            int segundos = tiempo % 60;
+            QString texto = QString("%1. %2 — %3:%4")
+                                .arg(i + 1)
+                                .arg(QString::fromStdString(ranking[i].getNombre()))
+                                .arg(minutos, 2, 10, QChar('0'))
+                                .arg(segundos, 2, 10, QChar('0'));
+            QLabel *fila = new QLabel(texto, contenedorFilasRanking);
+            fila->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 20px;").arg(familiaFuente));
+            layoutFilasRanking->addWidget(fila);
+        }
+        if (ranking.empty()) {
+            QLabel *vacio = new QLabel("Nadie ha completado este nivel todavía.", contenedorFilasRanking);
+            vacio->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 18px;").arg(familiaFuente));
+            layoutFilasRanking->addWidget(vacio);
+        }
+    } else {
+        std::vector<Jugador> ranking = gestorArchivos->obtenerRankingSafari(10);
+        for (int i = 0; i < (int)ranking.size(); i++) {
+            QString texto = QString("%1. %2 — %3 Safaris completados")
+                                .arg(i + 1)
+                                .arg(QString::fromStdString(ranking[i].getNombre()))
+                                .arg(ranking[i].getCantidadSafarisCompletados());
+            QLabel *fila = new QLabel(texto, contenedorFilasRanking);
+            fila->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 20px;").arg(familiaFuente));
+            layoutFilasRanking->addWidget(fila);
+        }
+        if (ranking.empty()) {
+            QLabel *vacio = new QLabel("Nadie ha completado un Safari todavía.", contenedorFilasRanking);
+            vacio->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 18px;").arg(familiaFuente));
+            layoutFilasRanking->addWidget(vacio);
+        }
+    }
+}
+
 MainWindow::~MainWindow()
 {
     delete gestorArchivos;
 }
+
 
 // ======================= ÁLBUMS =======================
 

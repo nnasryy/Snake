@@ -26,6 +26,9 @@ public:
     int getMejorNivelCompletado() const;
     void registrarNivelCompletado(int nivel); // solo sube, nunca baja
     bool haCompletadoNivel(int nivel) const;  // true si ya ganó ese nivel al menos una vez
+    void registrarSafariCompletado();
+    int getCantidadSafarisCompletados() const;
+
 
     void mostrarInfo() const override; // polimorfismo: versión especializada
 
@@ -36,6 +39,7 @@ private:
     int mejorNivelCompletado; // 0 = ninguno, 1..3 = último nivel ganado
     int tiempoPorNivel[3]; // índice 0,1,2 para nivel 1,2,3
     int puntajeSafari;
+    int cantidadSafarisCompletados;
 };
 
 #endif

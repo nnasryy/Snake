@@ -14,12 +14,15 @@
 #include <QString>
 #include <QTransform>
 #include <algorithm>
+#include <QCheckBox>
+#include <QButtonGroup>
 #include "gestorarchivos.h"
 #include "tablero.h"
 #include "serpiente.h"
 #include "comida.h"
 #include "usuario.h"
 #include "jugador.h"
+#include <QVBoxLayout>
 #include "configuracionnivel.h"
 
 #include "bloquemovil.h"
@@ -115,6 +118,7 @@ private:
     int intervaloOriginalJuego;
     int contadorRalentizado;
     bool ralentizadoActivo;
+    bool celdaOcupadaPorSerpiente(int x, int y);
     bool modoInfinitoActual;
     void iniciarNivel2();
     QGraphicsPixmapItem **segmentosVisuales; // arreglo dinámico de sprites de la serpiente
@@ -123,6 +127,16 @@ private:
     QString rutaCabezaI;
     QString rutaColaD;
     QString rutaColaI;
+    QWidget *paginaSafariSetup;
+    QPushButton *btnSkinSafari[4];
+    QButtonGroup *grupoSkinSafari;
+    QPushButton *btnMurosSafari[2];
+    QButtonGroup *grupoMurosSafari;
+    QPushButton *btnVidasSafari[2];
+    QButtonGroup *grupoVidasSafari;
+    QCheckBox *chkPowerUpSafari[4];
+    QLabel *lblToastSafari;
+    bool modoSafariActivo;
     int intervaloBaseNivel2;
     QString* rutasPowerUpVariantes = nullptr;
     int* tiposPowerUpVariantes = nullptr;
@@ -146,6 +160,14 @@ private:
     void abrirAlbum(int nivel);
     bool nivelCompletado(int nivel) const;
 
+    QWidget *paginaRanking;
+    QWidget *contenedorFilasRanking;
+    QVBoxLayout *layoutFilasRanking;
+    QButtonGroup *grupoTabsRanking;
+    QPushButton *btnTabRanking[4];
+    void crearPaginaRanking();
+    void mostrarRanking(int tab);
+
     void crearPaginaInicio();
     void iniciarNivelConConfiguracion(ConfiguracionNivel &config);
     void crearPaginaUsername();
@@ -163,6 +185,10 @@ private:
     void ocultarPausa();
     void crearPaginaVictoria();
     void crearPaginaDerrota();
+    void crearPaginaSafariSetup();
+    void iniciarSafari();
+    void mostrarToastSafari(QString texto);
+    void finalizarSafariPorDerrota();
     void finalizarPartidaPorDerrota(QString razon);
     void mostrarVictoria(int nivel, int manzanas, int vidas, int segundos, bool esRecord);
     void mostrarDerrota(int nivel, QString razon, int manzanas, int segundos);

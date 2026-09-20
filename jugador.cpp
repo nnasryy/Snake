@@ -77,7 +77,12 @@ void Jugador::actualizarRecordSafari(int frutas)
 {
     if (frutas > puntajeSafari) puntajeSafari = frutas;
 }
-
+void Jugador::registrarSafariCompletado() {
+    cantidadSafarisCompletados++;
+}
+int Jugador::getCantidadSafarisCompletados() const {
+    return cantidadSafarisCompletados;
+}
 int Jugador::getPuntajeSafari() const { return puntajeSafari; }
 
 void Jugador::mostrarInfo() const
