@@ -101,5 +101,11 @@
         <file>Recursos/NodoNegroLvl1.png</file>
         <file>Recursos/NodoAmarilloLvl1.png</file>
         <file>Recursos/RocaSafari.png</file>
+        <file>Recursos/PantallaOpciones.png</file>
+        <file>Recursos/PassClosedOpciones.png</file>
+        <file>Recursos/PassOpenedOpciones.png</file>
+        <file>Recursos/OpcionesSalir.png</file>
+        <file>Recursos/WASD.png</file>
+        <file>Recursos/FLECHAS.png</file>
     </qresource>
 </RCC>

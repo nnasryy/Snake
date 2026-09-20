@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     crearPaginaVictoria();
     crearPaginaDerrota();
     crearPaginaAlbums();
+    crearPaginaOpciones();
     crearPaginaSafariSetup();
     crearPaginaRanking();
     for (int nivel = 1; nivel <= 3; nivel++) crearPaginaAlbumNivel(nivel);
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     resize(800, 700);
     setWindowTitle("Snake Avanzado");
+    qApp->installEventFilter(this); // captura las teclas de juego sin importar el foco
 }
 
 void MainWindow::crearPaginaInicio()
@@ -322,9 +324,7 @@ void MainWindow::crearPaginaMenuPrincipal()
     btnOpciones->setFlat(true);
     btnOpciones->setStyleSheet("border: none; background: transparent;");
 
-    connect(btnOpciones, &QPushButton::clicked, this, [](){
-        qDebug() << "Botón Opciones presionado (pantalla pendiente)";
-    });
+    connect(btnOpciones, &QPushButton::clicked, this, &MainWindow::abrirOpciones);
 
     QPushButton *btnAlbum = new QPushButton(paginaMenuPrincipal);
     btnAlbum->setIcon(QIcon(":/Recursos/MenuAlbum.png"));
@@ -699,13 +699,41 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    switch (event->key()) {
-    case Qt::Key_Up:    case Qt::Key_W: serpienteJuego.cambiarDireccion(ARRIBA); break;
-    case Qt::Key_Down:  case Qt::Key_S: serpienteJuego.cambiarDireccion(ABAJO); break;
-    case Qt::Key_Left:  case Qt::Key_A: serpienteJuego.cambiarDireccion(IZQUIERDA); break;
-    case Qt::Key_Right: case Qt::Key_D: serpienteJuego.cambiarDireccion(DERECHA); break;
-    default: QMainWindow::keyPressEvent(event); break;
+    if (controlesWASD) {
+        switch (event->key()) {
+        case Qt::Key_W: serpienteJuego.cambiarDireccion(ARRIBA); break;
+        case Qt::Key_S: serpienteJuego.cambiarDireccion(ABAJO); break;
+        case Qt::Key_A: serpienteJuego.cambiarDireccion(IZQUIERDA); break;
+        case Qt::Key_D: serpienteJuego.cambiarDireccion(DERECHA); break;
+        default: QMainWindow::keyPressEvent(event); break;
+        }
+    } else {
+        switch (event->key()) {
+        case Qt::Key_Up:    serpienteJuego.cambiarDireccion(ARRIBA); break;
+        case Qt::Key_Down:  serpienteJuego.cambiarDireccion(ABAJO); break;
+        case Qt::Key_Left:  serpienteJuego.cambiarDireccion(IZQUIERDA); break;
+        case Qt::Key_Right: serpienteJuego.cambiarDireccion(DERECHA); break;
+        default: QMainWindow::keyPressEvent(event); break;
+        }
     }
+}
+
+// Filtro a nivel de aplicación: en la pantalla de juego las teclas de movimiento se manejan
+// SIEMPRE aquí, sin importar qué widget tenga el foco (QGraphicsView o un botón se comen las flechas).
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress && stack->currentWidget() == paginaJuego) {
+        QKeyEvent *ke = static_cast<QKeyEvent*>(event);
+        switch (ke->key()) {
+        case Qt::Key_Up: case Qt::Key_Down: case Qt::Key_Left: case Qt::Key_Right:
+        case Qt::Key_W:  case Qt::Key_A:    case Qt::Key_S:    case Qt::Key_D:
+            keyPressEvent(ke);
+            return true; // ya manejada, nadie más la procesa
+        default:
+            break;
+        }
+    }
+    return QMainWindow::eventFilter(obj, event);
 }
 
 void MainWindow::actualizarJuego()
@@ -1735,4 +1763,152 @@ void MainWindow::abrirAlbum(int nivel)
 {
     if (nivel < 1 || nivel > 3) return;
     stack->setCurrentWidget(paginaAlbumNivel[nivel - 1]);
+}
+
+// ======================= OPCIONES =======================
+
+QPixmap MainWindow::pixmapEnGris(const QPixmap &original)
+{
+    QImage img = original.toImage().convertToFormat(QImage::Format_ARGB32);
+    for (int y = 0; y < img.height(); y++) {
+        for (int x = 0; x < img.width(); x++) {
+            QRgb px = img.pixel(x, y);
+            int g = qGray(px) * 6 / 10; // gris y un poco más oscuro
+            img.setPixel(x, y, qRgba(g, g, g, qAlpha(px)));
+        }
+    }
+    return QPixmap::fromImage(img);
+}
+
+void MainWindow::crearPaginaOpciones()
+{
+    paginaOpciones = new QWidget();
+
+    QLabel *fondo = new QLabel(paginaOpciones);
+    fondo->setPixmap(QPixmap(":/Recursos/PantallaOpciones.png"));
+    fondo->setScaledContents(true); // la imagen es 1097x960, se ajusta a 800x700
+    fondo->setGeometry(0, 0, 800, 700);
+    fondo->lower();
+
+    QString estiloCampo = QString(
+                              "QLineEdit {"
+                              "  background-color: rgb(10, 54, 8);"
+                              "  border: 4px solid rgb(177, 215, 77);"
+                              "  color: rgb(177, 215, 77);"
+                              "  font-family: '%1';"
+                              "  font-size: 24px;"
+                              "  padding-left: 10px;"
+                              "}"
+                              ).arg(familiaFuente);
+
+    // --- Username (solo lectura) ---
+    campoOpcionesUsuario = new QLineEdit(paginaOpciones);
+    campoOpcionesUsuario->setGeometry(70, 259, 660, 54);
+    campoOpcionesUsuario->setReadOnly(true);
+    campoOpcionesUsuario->setStyleSheet(estiloCampo);
+
+    // --- Password (solo lectura, con ojito para ocultar/mostrar) ---
+    campoOpcionesPassword = new QLineEdit(paginaOpciones);
+    campoOpcionesPassword->setGeometry(70, 370, 586, 54);
+    campoOpcionesPassword->setReadOnly(true);
+    campoOpcionesPassword->setEchoMode(QLineEdit::Password);
+    campoOpcionesPassword->setStyleSheet(estiloCampo);
+
+    btnOpcionesPassword = new QPushButton(paginaOpciones);
+    btnOpcionesPassword->setCheckable(true);
+    btnOpcionesPassword->setIcon(QIcon(":/Recursos/PassClosedOpciones.png"));
+    btnOpcionesPassword->setIconSize(QSize(54, 54));
+    btnOpcionesPassword->setGeometry(664, 370, 54, 54);
+    btnOpcionesPassword->setFlat(true);
+    btnOpcionesPassword->setStyleSheet("border: none; background: transparent;");
+    connect(btnOpcionesPassword, &QPushButton::toggled, this, [this](bool visible){
+        campoOpcionesPassword->setEchoMode(visible ? QLineEdit::Normal : QLineEdit::Password);
+        btnOpcionesPassword->setIcon(QIcon(visible ? ":/Recursos/PassOpenedOpciones.png"
+                                                   : ":/Recursos/PassClosedOpciones.png"));
+    });
+
+    // --- Imágenes de teclas (normal y en gris) ---
+    teclasWasdNormal    = QPixmap(":/Recursos/WASD.png");
+    teclasFlechasNormal = QPixmap(":/Recursos/FLECHAS.png");
+    teclasWasdGris      = pixmapEnGris(teclasWasdNormal);
+    teclasFlechasGris   = pixmapEnGris(teclasFlechasNormal);
+
+    lblTeclasWasd = new QLabel(paginaOpciones);
+    lblTeclasWasd->setGeometry(53, 498, 325, 98);
+    lblTeclasFlechas = new QLabel(paginaOpciones);
+    lblTeclasFlechas->setGeometry(436, 498, 325, 98);
+
+    // --- Botones de selección (uno u otro) ---
+    QString estiloSelect =
+        "QPushButton { background-color: rgb(10, 54, 8); border: 3px solid rgb(177, 215, 77); }"
+        "QPushButton:checked { background-color: rgb(177, 215, 77); }";
+
+    btnSelWasd = new QPushButton(paginaOpciones);
+    btnSelWasd->setCheckable(true);
+    btnSelWasd->setGeometry(246, 481, 22, 22);
+    btnSelWasd->setCursor(Qt::PointingHandCursor);
+    btnSelWasd->setStyleSheet(estiloSelect);
+
+    btnSelFlechas = new QPushButton(paginaOpciones);
+    btnSelFlechas->setCheckable(true);
+    btnSelFlechas->setGeometry(656, 481, 22, 22);
+    btnSelFlechas->setCursor(Qt::PointingHandCursor);
+    btnSelFlechas->setStyleSheet(estiloSelect);
+
+    QButtonGroup *grupoControles = new QButtonGroup(this);
+    grupoControles->setExclusive(true); // siempre hay uno seleccionado
+    grupoControles->addButton(btnSelWasd);
+    grupoControles->addButton(btnSelFlechas);
+
+    connect(btnSelWasd, &QPushButton::clicked, this, [this](){
+        controlesWASD = true;
+        actualizarTeclasOpciones();
+    });
+    connect(btnSelFlechas, &QPushButton::clicked, this, [this](){
+        controlesWASD = false;
+        actualizarTeclasOpciones();
+    });
+
+    // --- Botón salir ---
+    QPushButton *btnSalir = new QPushButton(paginaOpciones);
+    btnSalir->setIcon(QIcon(":/Recursos/OpcionesSalir.png"));
+    btnSalir->setIconSize(QSize(204, 52));
+    btnSalir->setGeometry(298, 596, 204, 52);
+    btnSalir->setFlat(true);
+    btnSalir->setStyleSheet("border: none; background: transparent;");
+    connect(btnSalir, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaMenuPrincipal);
+    });
+
+    // --- Volumen (misma posición y tamaño que en Niveles) ---
+    QPushButton *btnVolumen = new QPushButton(paginaOpciones);
+    btnVolumen->setCheckable(true);
+    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
+    btnVolumen->setIconSize(QSize(50, 50));
+    btnVolumen->setGeometry(741, 8, 50, 50);
+    btnVolumen->setFlat(true);
+    btnVolumen->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
+        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
+    });
+
+    actualizarTeclasOpciones();
+    stack->addWidget(paginaOpciones);
+}
+
+void MainWindow::actualizarTeclasOpciones()
+{
+    btnSelWasd->setChecked(controlesWASD);
+    btnSelFlechas->setChecked(!controlesWASD);
+    lblTeclasWasd->setPixmap(controlesWASD ? teclasWasdNormal : teclasWasdGris);
+    lblTeclasFlechas->setPixmap(controlesWASD ? teclasFlechasGris : teclasFlechasNormal);
+}
+
+void MainWindow::abrirOpciones()
+{
+    campoOpcionesUsuario->setText(QString::fromStdString(jugadorActual.getNombre()));
+    campoOpcionesPassword->setText(QString::fromStdString(jugadorActual.getContrasena()));
+    btnOpcionesPassword->setChecked(false); // siempre entra con la contraseña oculta
+    actualizarTeclasOpciones();
+    stack->setCurrentWidget(paginaOpciones);
 }

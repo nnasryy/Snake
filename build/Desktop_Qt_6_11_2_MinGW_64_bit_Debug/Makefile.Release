@@ -156,8 +156,10 @@ release/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/CascabelHeadLeft.png \
 		../../Recursos/GanasteLvl2.png \
 		../../Recursos/MarinaHeadLeft.png \
+		../../Recursos/PantallaOpciones.png \
 		../../Recursos/MarinaTailLeft.png \
 		../../Recursos/Pixellari.ttf \
+		../../Recursos/PassOpenedOpciones.png \
 		../../Recursos/CascabelColaSafari.png \
 		../../Recursos/nivel1boton.png \
 		../../Recursos/nivel1background.png \
@@ -188,10 +190,12 @@ release/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/ExitButton.png \
 		../../Recursos/CascabelHead.png \
 		../../Recursos/EsmeraldaNodoSafari.png \
+		../../Recursos/WASD.png \
 		../../Recursos/MenuJugar.png \
 		../../Recursos/PezLvl3.png \
 		../../Recursos/NodoAzulLvl3Safari.png \
 		../../Recursos/PlayButton.png \
+		../../Recursos/OpcionesSalir.png \
 		../../Recursos/CascabelColaLeft.png \
 		../../Recursos/PassOpened.png \
 		../../Recursos/MenuPantalla.png \
@@ -216,6 +220,7 @@ release/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/MenuRecords.png \
 		../../Recursos/MarinaHeadSafari.png \
 		../../Recursos/CascabelColaLeftSafari.png \
+		../../Recursos/FLECHAS.png \
 		../../Recursos/PezPayasoSafari.png \
 		../../Recursos/AlbumNivel3ConCandado.png \
 		../../Recursos/RatonSafari.png \
@@ -239,6 +244,7 @@ release/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/PauseVolumenLvl2.png \
 		../../Recursos/UsernameConfirmar.png \
 		../../Recursos/CascabelHeadLeftSafari.png \
+		../../Recursos/PassClosedOpciones.png \
 		../../Recursos/PlayVolumenLvl2.png \
 		../../Recursos/nivel3background.png
 	C:\Qt\6.11.2\mingw_64\bin\rcc.exe -name Recursos --no-zstd ..\..\Recursos.qrc -o release\qrc_Recursos.cpp
@@ -797,10 +803,168 @@ release/configuracionnivel.o: ../../configuracionnivel.cpp ../../configuracionni
 
 release/gestorarchivos.o: ../../gestorarchivos.cpp ../../gestorarchivos.h \
 		../../jugador.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/QString \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstring.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qchar.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qglobal.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtcoreglobal.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtversionchecks.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtconfiginclude.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qconfig.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtcore-config.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtconfigmacros.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtdeprecationdefinitions.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcompilerdetection.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qprocessordetection.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qsystemdetection.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtcoreexports.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtdeprecationmarkers.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtclasshelpermacros.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtpreprocessorsupport.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qassert.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtnoop.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtypes.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtversion.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtypeinfo.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcontainerfwd.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qsysinfo.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qlogging.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qflags.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcompare_impl.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qatomic.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qbasicatomic.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qatomic_cxx11.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qgenericatomic.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qyieldcpu.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qconstructormacros.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qdarwinhelpers.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qexceptionhandling.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qforeach.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qttypetraits.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qfunctionpointer.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qglobalstatic.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qmalloc.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qminmax.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qnumeric.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q20type_traits.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qoverload.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qswap.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtenvironmentvariables.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtresource.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qttranslation.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qversiontagging.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcompare.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstdlibdetection.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcomparehelpers.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qbytearray.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qrefcount.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qnamespace.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtmetamacros.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qarraydata.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qpair.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qarraydatapointer.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qarraydataops.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcontainertools_impl.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qxptype_traits.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q23type_traits.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q20functional.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q20memory.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q17memory.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qbytearrayalgorithms.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qbytearrayview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringfwd.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringalgorithms.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qlatin1stringview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qanystringview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qutf8stringview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringtokenizer.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringbuilder.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringconverter.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringconverter_base.h \
 		../../usuario.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\gestorarchivos.o ..\..\gestorarchivos.cpp
 
 release/jugador.o: ../../jugador.cpp ../../jugador.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/QString \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstring.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qchar.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qglobal.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtcoreglobal.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtversionchecks.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtconfiginclude.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qconfig.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtcore-config.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtconfigmacros.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtdeprecationdefinitions.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcompilerdetection.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qprocessordetection.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qsystemdetection.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtcoreexports.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtdeprecationmarkers.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtclasshelpermacros.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtpreprocessorsupport.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qassert.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtnoop.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtypes.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtversion.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtypeinfo.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcontainerfwd.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qsysinfo.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qlogging.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qflags.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcompare_impl.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qatomic.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qbasicatomic.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qatomic_cxx11.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qgenericatomic.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qyieldcpu.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qconstructormacros.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qdarwinhelpers.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qexceptionhandling.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qforeach.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qttypetraits.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qfunctionpointer.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qglobalstatic.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qmalloc.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qminmax.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qnumeric.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q20type_traits.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qoverload.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qswap.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtenvironmentvariables.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtresource.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qttranslation.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qversiontagging.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcompare.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstdlibdetection.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcomparehelpers.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qbytearray.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qrefcount.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qnamespace.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qtmetamacros.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qarraydata.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qpair.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qarraydatapointer.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qarraydataops.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qcontainertools_impl.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qxptype_traits.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q23type_traits.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q20functional.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q20memory.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/q17memory.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qbytearrayalgorithms.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qbytearrayview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringfwd.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringalgorithms.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qlatin1stringview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qanystringview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qutf8stringview.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringtokenizer.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringbuilder.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringconverter.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtCore/qstringconverter_base.h \
 		../../usuario.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\jugador.o ..\..\jugador.cpp
 

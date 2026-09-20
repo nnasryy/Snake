@@ -150,6 +150,22 @@ private:
     QPixmap obtenerSpriteDireccional(QString rutaDerecha, QString rutaIzquierda, Direccion direccion);
     QWidget *paginaNiveles;
 
+    // --- Opciones ---
+    QWidget *paginaOpciones;
+    QLineEdit *campoOpcionesUsuario;
+    QLineEdit *campoOpcionesPassword;
+    QPushButton *btnOpcionesPassword;
+    QPushButton *btnSelWasd;
+    QPushButton *btnSelFlechas;
+    QLabel *lblTeclasWasd;
+    QLabel *lblTeclasFlechas;
+    QPixmap teclasWasdNormal, teclasWasdGris, teclasFlechasNormal, teclasFlechasGris;
+    bool controlesWASD = true;         // true = WASD (predeterminado), false = flechas
+    void crearPaginaOpciones();
+    void abrirOpciones();
+    void actualizarTeclasOpciones();   // pone en gris las teclas que no se están usando
+    static QPixmap pixmapEnGris(const QPixmap &original);
+
     // --- Álbums ---
     QWidget *paginaAlbums;             // pantalla principal con los 3 libros
     QWidget *paginaAlbumNivel[3];      // [0] = álbum nivel 1, [1] = nivel 2, [2] = nivel 3
@@ -195,6 +211,7 @@ private:
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override; // captura teclas de juego sin importar el foco
 };
 
 #endif // MAINWINDOW_H
