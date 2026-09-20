@@ -36,6 +36,12 @@ private:
     QStackedWidget *stack;
     QWidget *paginaInicio;
     QWidget *paginaUsername;
+    QLineEdit *campoContrasena;
+    QPushButton *btnMostrarPassword;
+    QWidget *overlayErrorLogin;
+    QLabel *lblErrorLogin;
+    void togglePassword();
+    void mostrarErrorLogin(QString mensaje);
     QWidget *paginaMenuPrincipal;
     QWidget *paginaJuego;
     QGraphicsScene *escenaJuego;

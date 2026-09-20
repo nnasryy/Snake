@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>Recursos/PauseVolumen.png</file>
         <file>Recursos/PlayVolumen.png</file>
-        <file>Recursos/UsernamePantalla.png</file>
         <file>Recursos/UsernameSalir.png</file>
         <file>Recursos/UsernameConfirmar.png</file>
         <file>Recursos/SnakeInicio.png</file>
@@ -76,5 +75,8 @@
         <file>Recursos/PantallaAlbum1.png</file>
         <file>Recursos/PantallaAlbum2.png</file>
         <file>Recursos/PantallaAlbum3.png</file>
+        <file>Recursos/UsernamePantalla.png</file>
+        <file>Recursos/PassClosed.png</file>
+        <file>Recursos/PassOpened.png</file>
     </qresource>
 </RCC>

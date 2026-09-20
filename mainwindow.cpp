@@ -7,6 +7,7 @@
 #include <QFontDatabase>
 #include <QTransform>
 #include <algorithm>
+#include <QRegularExpressionValidator>
 const int MainWindow::INTERVALO_MINIMO_NIVEL2;
 
 using namespace std;
@@ -104,52 +105,76 @@ void MainWindow::crearPaginaUsername()
 {
     paginaUsername = new QWidget();
 
-
     QLabel *fondo = new QLabel(paginaUsername);
     fondo->setPixmap(QPixmap(":/Recursos/UsernamePantalla.png"));
     fondo->setGeometry(0, 0, 800, 700);
     fondo->lower();
 
+    QString estiloCampo = QString(
+                              "QLineEdit {"
+                              "  background-color: rgb(10, 54, 8);"
+                              "  border: 5px solid rgb(177, 215, 77);"
+                              "  color: rgb(177, 215, 77);"
+                              "  font-family: '%1';"
+                              "  font-size: 28px;"
+                              "  padding-left: 10px;"
+                              "}"
+                              ).arg(familiaFuente);
 
+    // Solo letras y números, sin símbolos ni espacios
+    QRegularExpression regexAlfanumerico("[A-Za-z0-9]*");
+
+    // --- Campo de usuario ---
     campoNombre = new QLineEdit(paginaUsername);
-    campoNombre->setGeometry(98, 318, 599, 93);
+    campoNombre->setGeometry(70, 230, 591, 75);
     campoNombre->setAlignment(Qt::AlignCenter);
-    campoNombre->setMaxLength(15); // evita nombres absurdamente largos que rompan tu HUD
-    campoNombre->setPlaceholderText("Escribe tu user");
-    campoNombre->setStyleSheet(QString(
-                                   "QLineEdit {"
-                                   "  background-color: rgb(15, 58, 13);"
-                                   "  border: 9px solid rgb(143, 208, 53);"
-                                   "  color: rgb(143, 208, 53);"
-                                   "  font-family: '%1';"
-                                   "  font-size: 49px;"
-                                   "}"
-                                   ).arg(familiaFuente));
+    campoNombre->setMaxLength(12); // mínimo 6 se valida al confirmar, máximo razonable para no romper el HUD
+    campoNombre->setPlaceholderText("Usuario (mín. 6 caracteres)");
+    campoNombre->setValidator(new QRegularExpressionValidator(regexAlfanumerico, campoNombre));
+    campoNombre->setStyleSheet(estiloCampo);
 
+    // --- Campo de contraseña ---
+    campoContrasena = new QLineEdit(paginaUsername);
+    campoContrasena->setGeometry(69, 420, 591, 75);
+    campoContrasena->setAlignment(Qt::AlignCenter);
+    campoContrasena->setMaxLength(20);
+    campoContrasena->setPlaceholderText("Contraseña (letras y números)");
+    campoContrasena->setEchoMode(QLineEdit::Password);
+    campoContrasena->setValidator(new QRegularExpressionValidator(regexAlfanumerico, campoContrasena));
+    campoContrasena->setStyleSheet(estiloCampo);
 
+    // --- Botón mostrar/ocultar contraseña ---
+    btnMostrarPassword = new QPushButton(paginaUsername);
+    btnMostrarPassword->setCheckable(true);
+    btnMostrarPassword->setIcon(QIcon(":/Recursos/PassClosed.png"));
+    btnMostrarPassword->setIconSize(QSize(65, 65));
+    btnMostrarPassword->setGeometry(690, 427, 65, 65);
+    btnMostrarPassword->setFlat(true);
+    btnMostrarPassword->setStyleSheet("border: none; background: transparent;");
+    connect(btnMostrarPassword, &QPushButton::clicked, this, &MainWindow::togglePassword);
+
+    // --- Botón salir ---
     QPushButton *btnSalir = new QPushButton(paginaUsername);
     btnSalir->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
     btnSalir->setIconSize(QSize(278, 70));
-    btnSalir->setGeometry(66, 462, 278, 70);
+    btnSalir->setGeometry(82, 549, 278, 70);
     btnSalir->setFlat(true);
     btnSalir->setStyleSheet("border: none; background: transparent;");
-
     connect(btnSalir, &QPushButton::clicked, this, [this](){
         stack->setCurrentWidget(paginaInicio);
     });
 
-
+    // --- Botón confirmar ---
     QPushButton *btnConfirmar = new QPushButton(paginaUsername);
     btnConfirmar->setIcon(QIcon(":/Recursos/UsernameConfirmar.png"));
     btnConfirmar->setIconSize(QSize(278, 70));
-    btnConfirmar->setGeometry(457, 462, 278, 70);
+    btnConfirmar->setGeometry(463, 553, 278, 70);
     btnConfirmar->setFlat(true);
     btnConfirmar->setStyleSheet("border: none; background: transparent;");
-
     connect(btnConfirmar, &QPushButton::clicked, this, &MainWindow::validarNombre);
-    connect(campoNombre, &QLineEdit::returnPressed, this, &MainWindow::validarNombre); // Enter también confirma
+    connect(campoContrasena, &QLineEdit::returnPressed, this, &MainWindow::validarNombre);
 
-
+    // --- Botón de volumen (igual al resto de pantallas) ---
     QPushButton *btnVolumen = new QPushButton(paginaUsername);
     btnVolumen->setCheckable(true);
     btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
@@ -157,47 +182,85 @@ void MainWindow::crearPaginaUsername()
     btnVolumen->setGeometry(693, 83, 74, 74);
     btnVolumen->setFlat(true);
     btnVolumen->setStyleSheet("border: none; background: transparent;");
-
     connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
         btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
+    });
+
+    // --- Overlay de error (oculto por defecto) ---
+    overlayErrorLogin = new QWidget(paginaUsername);
+    overlayErrorLogin->setGeometry(150, 260, 500, 160);
+    overlayErrorLogin->setStyleSheet("background-color: rgba(15, 58, 13, 230); border: 5px solid rgb(143, 208, 53);");
+    overlayErrorLogin->setVisible(false);
+
+    lblErrorLogin = new QLabel(overlayErrorLogin);
+    lblErrorLogin->setGeometry(20, 15, 460, 80);
+    lblErrorLogin->setWordWrap(true);
+    lblErrorLogin->setAlignment(Qt::AlignCenter);
+    lblErrorLogin->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 18px;").arg(familiaFuente));
+
+    QPushButton *btnCerrarError = new QPushButton("Entendido", overlayErrorLogin);
+    btnCerrarError->setGeometry(175, 105, 150, 40);
+    connect(btnCerrarError, &QPushButton::clicked, this, [this](){
+        overlayErrorLogin->setVisible(false);
     });
 
     stack->addWidget(paginaUsername);
 }
 
+void MainWindow::togglePassword()
+{
+    if (btnMostrarPassword->isChecked()) {
+        campoContrasena->setEchoMode(QLineEdit::Normal);
+        btnMostrarPassword->setIcon(QIcon(":/Recursos/PassOpened.png"));
+    } else {
+        campoContrasena->setEchoMode(QLineEdit::Password);
+        btnMostrarPassword->setIcon(QIcon(":/Recursos/PassClosed.png"));
+    }
+}
+
+void MainWindow::mostrarErrorLogin(QString mensaje)
+{
+    lblErrorLogin->setText(mensaje);
+    overlayErrorLogin->setVisible(true);
+    overlayErrorLogin->raise();
+}
 void MainWindow::validarNombre()
 {
     QString nombreQt = campoNombre->text().trimmed();
+    QString passwordQt = campoContrasena->text();
 
-    if (nombreQt.isEmpty()) {
-        campoNombre->setStyleSheet(QString(
-                                       "QLineEdit {"
-                                       "  background-color: rgb(15, 58, 13);"
-                                       "  border: 9px solid red;"
-                                       "  color: red;"
-                                       "  font-family: '%1';"
-                                       "  font-size: 49px;"
-                                       "}"
-                                       ).arg(familiaFuente));
-        campoNombre->setPlaceholderText("¡Ingresa un nombre!");
+    if (nombreQt.length() < 6) {
+        mostrarErrorLogin("El usuario debe tener al menos 6 caracteres.");
         return;
     }
 
-    string nombre = nombreQt.toStdString(); // QString -> std::string, para GestorArchivos
+    if (!Usuario::esContrasenaValida(passwordQt.toStdString())) {
+        mostrarErrorLogin("La contraseña debe tener al menos 6 caracteres,\ncon letras y números.");
+        return;
+    }
 
-    // READ: ¿este nombre ya existe?
+    string nombre = nombreQt.toStdString();
+    string password = passwordQt.toStdString();
+
     if (gestorArchivos->buscarJugadorPorNombre(nombre, jugadorActual)) {
+        // Usuario existente: la contraseña debe coincidir
+        if (!jugadorActual.verificarContrasena(password)) {
+            mostrarErrorLogin("Contraseña incorrecta para ese usuario.");
+            return;
+        }
         qDebug() << "Bienvenido de vuelta:" << QString::fromStdString(jugadorActual.getNombre())
-        << "| Puntaje máximo:" << jugadorActual.getPuntajeMaximo()
-        << "| Nivel alcanzado:" << jugadorActual.getNivelMaximoAlcanzado();
+                 << "| Puntaje máximo:" << jugadorActual.getPuntajeMaximo()
+                 << "| Nivel alcanzado:" << jugadorActual.getNivelMaximoAlcanzado();
     } else {
-        // CREATE: jugador nuevo, con valores en cero
+        // Usuario nuevo
         jugadorActual = Jugador(nombre);
+        jugadorActual.setContrasena(password);
         gestorArchivos->crearJugador(jugadorActual);
-
         qDebug() << "Nuevo jugador creado:" << QString::fromStdString(jugadorActual.getNombre());
     }
 
+    campoNombre->clear();
+    campoContrasena->clear();
     stack->setCurrentWidget(paginaMenuPrincipal);
 }
 
