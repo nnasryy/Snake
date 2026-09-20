@@ -130,6 +130,16 @@ private:
     QPixmap obtenerSpriteDireccional(QString rutaDerecha, QString rutaIzquierda, Direccion direccion);
     QWidget *paginaNiveles;
 
+    // --- Álbums ---
+    QWidget *paginaAlbums;             // pantalla principal con los 3 libros
+    QWidget *paginaAlbumNivel[3];      // [0] = álbum nivel 1, [1] = nivel 2, [2] = nivel 3
+    QPushButton *btnAlbumNivel[3];
+    void crearPaginaAlbums();
+    void crearPaginaAlbumNivel(int nivel);
+    void actualizarBotonesAlbums();    // cambia cada libro entre con/sin candado
+    void abrirAlbum(int nivel);
+    bool nivelCompletado(int nivel) const;
+
     void crearPaginaInicio();
     void iniciarNivelConConfiguracion(ConfiguracionNivel &config);
     void crearPaginaUsername();

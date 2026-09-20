@@ -17,12 +17,17 @@ public:
     void desbloquearNivel(int nivel); // solo sube, nunca baja
     bool tieneNivelDesbloqueado(int nivel) const;
 
+    int getMejorNivelCompletado() const;
+    void registrarNivelCompletado(int nivel); // solo sube, nunca baja
+    bool haCompletadoNivel(int nivel) const;  // true si ya ganó ese nivel al menos una vez
+
     void mostrarInfo() const override; // polimorfismo: versión especializada
 
 private:
     int puntajeMaximo;
     int tiempoMaximo;
     int nivelMaximoAlcanzado;
+    int mejorNivelCompletado; // 0 = ninguno, 1..3 = último nivel ganado
 };
 
 #endif

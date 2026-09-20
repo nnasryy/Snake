@@ -66,5 +66,15 @@
         <file>Recursos/NodoAzulLvl3.png</file>
         <file>Recursos/NodoNegroLvl3.png</file>
         <file>Recursos/PezGloboLvl3.png</file>
+        <file>Recursos/AlbumNivel1SinCandado.png</file>
+        <file>Recursos/AlbumNivel1ConCandado.png</file>
+        <file>Recursos/AlbumNivel2SinCandado.png</file>
+        <file>Recursos/AlbumNivel2ConCandado.png</file>
+        <file>Recursos/AlbumNivel3SinCandado.png</file>
+        <file>Recursos/AlbumNivel3ConCandado.png</file>
+        <file>Recursos/PantallaAlbums.png</file>
+        <file>Recursos/PantallaAlbum1.png</file>
+        <file>Recursos/PantallaAlbum2.png</file>
+        <file>Recursos/PantallaAlbum3.png</file>
     </qresource>
 </RCC>

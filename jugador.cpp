@@ -6,6 +6,7 @@ Jugador::Jugador() : Usuario() // llama al constructor de la clase base
     puntajeMaximo = 0;
     tiempoMaximo = 0;
     nivelMaximoAlcanzado = 1;
+    mejorNivelCompletado = 0;
 }
 
 Jugador::Jugador(std::string nombreInicial) : Usuario(nombreInicial)
@@ -13,6 +14,7 @@ Jugador::Jugador(std::string nombreInicial) : Usuario(nombreInicial)
     puntajeMaximo = 0;
     tiempoMaximo = 0;
     nivelMaximoAlcanzado = 1;
+    mejorNivelCompletado = 0;
 }
 
 int Jugador::getPuntajeMaximo() const { return puntajeMaximo; }
@@ -33,6 +35,18 @@ void Jugador::desbloquearNivel(int nivel)
 bool Jugador::tieneNivelDesbloqueado(int nivel) const
 {
     return nivelMaximoAlcanzado >= nivel;
+}
+
+int Jugador::getMejorNivelCompletado() const { return mejorNivelCompletado; }
+
+void Jugador::registrarNivelCompletado(int nivel)
+{
+    if (nivel > mejorNivelCompletado) mejorNivelCompletado = nivel;
+}
+
+bool Jugador::haCompletadoNivel(int nivel) const
+{
+    return mejorNivelCompletado >= nivel;
 }
 
 void Jugador::mostrarInfo() const

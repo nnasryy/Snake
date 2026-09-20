@@ -43,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
     crearPaginaJuego();
     crearPaginaVictoria();
     crearPaginaDerrota();
+    crearPaginaAlbums();
+    for (int nivel = 1; nivel <= 3; nivel++) crearPaginaAlbumNivel(nivel);
 
     resize(800, 700);
     setWindowTitle("Snake Avanzado");
@@ -263,8 +265,9 @@ void MainWindow::crearPaginaMenuPrincipal()
     btnAlbum->setFlat(true);
     btnAlbum->setStyleSheet("border: none; background: transparent;");
 
-    connect(btnAlbum, &QPushButton::clicked, this, [](){
-        qDebug() << "Botón Album presionado (pantalla pendiente)";
+    connect(btnAlbum, &QPushButton::clicked, this, [this](){
+        actualizarBotonesAlbums();
+        stack->setCurrentWidget(paginaAlbums);
     });
 
 
@@ -675,6 +678,7 @@ void MainWindow::actualizarJuego()
             jugadorActual.actualizarRecord(frutasComidas, segundosTranscurridos);
             if (nivelJugadoActual == 1) jugadorActual.desbloquearNivel(2);
             if (nivelJugadoActual == 2) jugadorActual.desbloquearNivel(3);
+            jugadorActual.registrarNivelCompletado(nivelJugadoActual);
             gestorArchivos->actualizarJugador(jugadorActual);
             mostrarVictoria(nivelJugadoActual, frutasComidas, vidasRestantes, segundosTranscurridos, esRecordNuevo);
         }
@@ -1081,7 +1085,8 @@ void MainWindow::crearPaginaVictoria()
     btnVerAlbum->setFlat(true);
     btnVerAlbum->setStyleSheet("border: none; background: transparent;");
     connect(btnVerAlbum, &QPushButton::clicked, this, [this](){
-        qDebug() << "Abrir álbum (pendiente)";
+        actualizarBotonesAlbums();
+        abrirAlbum(nivelJugadoActual);
     });
 
     QPushButton *btnVolverMenuVictoria = new QPushButton(paginaVictoria);
@@ -1239,4 +1244,87 @@ void MainWindow::ocultarPausa()
 MainWindow::~MainWindow()
 {
     delete gestorArchivos;
+}
+
+// ======================= ÁLBUMS =======================
+
+bool MainWindow::nivelCompletado(int nivel) const
+{
+    return jugadorActual.haCompletadoNivel(nivel);
+}
+
+void MainWindow::crearPaginaAlbums()
+{
+    paginaAlbums = new QWidget();
+
+    QLabel *fondo = new QLabel(paginaAlbums);
+    fondo->setPixmap(QPixmap(":/Recursos/PantallaAlbums.png"));
+    fondo->setScaledContents(true); // la imagen es 1097x960, se ajusta a 800x700
+    fondo->setGeometry(0, 0, 800, 700);
+    fondo->lower();
+
+    const int posX[3] = {39, 290, 540}; // 39.3, 289.6 y 540.4 redondeados
+    const int posY = 280;
+
+    for (int i = 0; i < 3; i++) {
+        btnAlbumNivel[i] = new QPushButton(paginaAlbums);
+        btnAlbumNivel[i]->setIconSize(QSize(221, 221));
+        btnAlbumNivel[i]->setGeometry(posX[i], posY, 221, 221);
+        btnAlbumNivel[i]->setFlat(true);
+        btnAlbumNivel[i]->setStyleSheet("border: none; background: transparent;");
+
+        connect(btnAlbumNivel[i], &QPushButton::clicked, this, [this, i](){
+            if (nivelCompletado(i + 1)) abrirAlbum(i + 1); // con candado no hace nada
+        });
+    }
+
+    QPushButton *btnVolver = new QPushButton(paginaAlbums);
+    btnVolver->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
+    btnVolver->setIconSize(QSize(278, 70));
+    btnVolver->setGeometry(261, 585, 278, 70);
+    btnVolver->setFlat(true);
+    btnVolver->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolver, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaMenuPrincipal);
+    });
+
+    actualizarBotonesAlbums();
+    stack->addWidget(paginaAlbums);
+}
+
+void MainWindow::actualizarBotonesAlbums()
+{
+    for (int i = 0; i < 3; i++) {
+        int nivel = i + 1;
+        QString estado = nivelCompletado(nivel) ? "SinCandado" : "ConCandado";
+        btnAlbumNivel[i]->setIcon(QIcon(QString(":/Recursos/AlbumNivel%1%2.png").arg(nivel).arg(estado)));
+    }
+}
+
+void MainWindow::crearPaginaAlbumNivel(int nivel)
+{
+    QWidget *pagina = new QWidget();
+
+    QLabel *fondo = new QLabel(pagina);
+    fondo->setPixmap(QPixmap(QString(":/Recursos/PantallaAlbum%1.png").arg(nivel)));
+    fondo->setGeometry(0, 0, 800, 700);
+    fondo->lower();
+
+    QPushButton *btnVolver = new QPushButton("< VOLVER", pagina);
+    btnVolver->setGeometry(12, 10, 130, 40);
+    btnVolver->setCursor(Qt::PointingHandCursor);
+    btnVolver->setStyleSheet(QString("color: white; background: rgba(0, 0, 0, 150); border: none; "
+                                     "font-family: '%1'; font-size: 22px;").arg(familiaFuente));
+    connect(btnVolver, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaAlbums);
+    });
+
+    paginaAlbumNivel[nivel - 1] = pagina;
+    stack->addWidget(pagina);
+}
+
+void MainWindow::abrirAlbum(int nivel)
+{
+    if (nivel < 1 || nivel > 3) return;
+    stack->setCurrentWidget(paginaAlbumNivel[nivel - 1]);
 }
