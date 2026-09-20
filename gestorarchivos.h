@@ -2,6 +2,7 @@
 #define GESTORARCHIVOS_H
 
 #include <string>
+#include "jugador.h"
 #include <vector>
 
 using namespace std;
@@ -17,28 +18,19 @@ struct DatosJugador
 class GestorArchivos
 {
 public:
-    GestorArchivos(string rutaArchivo);
-
-    // --- CREATE ---
-    bool crearJugador(DatosJugador nuevoJugador);
-    // --- READ ---
-    bool buscarJugadorPorNombre(string nombre, DatosJugador &resultado);
-    vector<DatosJugador> obtenerTopJugadores(int cantidad);
-
-    // --- UPDATE ---
-    bool actualizarJugador(DatosJugador datosActualizados);
-
-    // --- DELETE ---
-    bool eliminarJugador(string nombre);
+    GestorArchivos(std::string rutaArchivo);
+    bool crearJugador(Jugador nuevoJugador);
+    bool buscarJugadorPorNombre(std::string nombre, Jugador &resultado);
+    std::vector<Jugador> obtenerTopJugadores(int cantidad);
+    bool actualizarJugador(Jugador datosActualizados);
+    bool eliminarJugador(std::string nombre);
 
 private:
-    string ruta;
-    vector<DatosJugador> jugadores;
-
+    std::string ruta;
+    std::vector<Jugador> jugadores;
     void cargarDesdeArchivo();
     void guardarEnArchivo();
-
-    int buscarPosicion(string nombre);
+    int buscarPosicion(std::string nombre);
 };
 
 #endif // GESTORARCHIVOS_H

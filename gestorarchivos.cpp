@@ -14,86 +14,72 @@ GestorArchivos::GestorArchivos(string rutaArchivo)
 
 void GestorArchivos::cargarDesdeArchivo()
 {
-    ifstream archivo(ruta);
-    if (!archivo.is_open()) {
-        return;
-    }
+    std::ifstream archivo(ruta);
+    if (!archivo.is_open()) return;
 
-    string linea;
-    while (getline(archivo, linea)) {
-        stringstream ss(linea);
-        string campo;
-        DatosJugador jugador;
+    std::string linea;
+    while (std::getline(archivo, linea)) {
+        std::stringstream ss(linea);
+        std::string campo, nombreLeido;
 
-        getline(ss, jugador.nombre, DELIMITADOR);
+        std::getline(ss, nombreLeido, '|');
+        Jugador j(nombreLeido); // constructor con nombre
 
-        getline(ss, campo, DELIMITADOR);
-        jugador.puntajeMaximo = std::stoi(campo);
+        std::getline(ss, campo, '|');
+        int puntaje = std::stoi(campo);
+        std::getline(ss, campo, '|');
+        int tiempo = std::stoi(campo);
+        std::getline(ss, campo, '|');
+        int nivel = std::stoi(campo);
 
-        getline(ss, campo, DELIMITADOR);
-        jugador.tiempoMaximo = std::stoi(campo);
+        j.actualizarRecord(puntaje, tiempo);
+        j.desbloquearNivel(nivel);
 
-        getline(ss, campo, DELIMITADOR);
-        jugador.nivelMaximoAlcanzado = std::stoi(campo);
-
-        jugadores.push_back(jugador);
+        jugadores.push_back(j);
     }
     archivo.close();
 }
 
 void GestorArchivos::guardarEnArchivo()
 {
-    ofstream archivo(ruta, std::ios::trunc);
-
-    for (const auto &jugadorActual : jugadores) {
-        archivo << jugadorActual.nombre << DELIMITADOR
-                << jugadorActual.puntajeMaximo << DELIMITADOR
-                << jugadorActual.tiempoMaximo << DELIMITADOR
-                << jugadorActual.nivelMaximoAlcanzado << endl;
+    std::ofstream archivo(ruta, std::ios::trunc);
+    for (const auto &j : jugadores) {
+        archivo << j.getNombre() << "|" << j.getPuntajeMaximo() << "|"
+                << j.getTiempoMaximo() << "|" << j.getNivelMaximoAlcanzado() << std::endl;
     }
     archivo.close();
 }
 
-int GestorArchivos::buscarPosicion(string nombre)
+
+int GestorArchivos::buscarPosicion(std::string nombre)
 {
     for (int i = 0; i < (int)jugadores.size(); i++) {
-        if (jugadores[i].nombre == nombre) {
-            return i;
-        }
+        if (jugadores[i].getNombre() == nombre) return i;
     }
     return -1;
 }
 
-bool GestorArchivos::crearJugador(DatosJugador nuevoJugador)
+bool GestorArchivos::crearJugador(Jugador nuevoJugador)
 {
-
-    if (buscarPosicion(nuevoJugador.nombre) != -1) {
-        return false;
-    }
-
+    if (buscarPosicion(nuevoJugador.getNombre()) != -1) return false;
     jugadores.push_back(nuevoJugador);
     guardarEnArchivo();
     return true;
 }
 
-bool GestorArchivos::buscarJugadorPorNombre(string nombre, DatosJugador &resultado)
+bool GestorArchivos::buscarJugadorPorNombre(std::string nombre, Jugador &resultado)
 {
-    int posicion = buscarPosicion(nombre);
-    if (posicion == -1) {
-        return false;
-    }
-    resultado = jugadores[posicion];
+    int pos = buscarPosicion(nombre);
+    if (pos == -1) return false;
+    resultado = jugadores[pos];
     return true;
 }
 
-bool GestorArchivos::actualizarJugador(DatosJugador datosActualizados)
+bool GestorArchivos::actualizarJugador(Jugador datosActualizados)
 {
-    int posicion = buscarPosicion(datosActualizados.nombre);
-    if (posicion == -1) {
-        return false;
-    }
-
-    jugadores[posicion] = datosActualizados;
+    int pos = buscarPosicion(datosActualizados.getNombre());
+    if (pos == -1) return false;
+    jugadores[pos] = datosActualizados;
     guardarEnArchivo();
     return true;
 }
@@ -110,17 +96,12 @@ bool GestorArchivos::eliminarJugador(string nombre)
     return true;
 }
 
-vector<DatosJugador> GestorArchivos::obtenerTopJugadores(int cantidad)
+std::vector<Jugador> GestorArchivos::obtenerTopJugadores(int cantidad)
 {
-    vector<DatosJugador> copia = jugadores;
-
-    sort(copia.begin(), copia.end(),
-              [](const DatosJugador &a, const DatosJugador &b) {
-                  return a.puntajeMaximo > b.puntajeMaximo;
-              });
-
-    if ((int)copia.size() > cantidad) {
-        copia.resize(cantidad);
-    }
+    std::vector<Jugador> copia = jugadores;
+    std::sort(copia.begin(), copia.end(), [](const Jugador &a, const Jugador &b) {
+        return a.getPuntajeMaximo() > b.getPuntajeMaximo();
+    });
+    if ((int)copia.size() > cantidad) copia.resize(cantidad);
     return copia;
 }

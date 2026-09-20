@@ -1,0 +1,13 @@
+release/bloquemovil.o
+release/comida.o
+release/configuracionnivel.o
+release/gestorarchivos.o
+release/jugador.o
+release/main.o
+release/mainwindow.o
+release/nodo.o
+release/serpiente.o
+release/tablero.o
+release/usuario.o
+release/qrc_Recursos.o
+release/moc_mainwindow.o

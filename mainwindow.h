@@ -18,12 +18,11 @@
 #include "tablero.h"
 #include "serpiente.h"
 #include "comida.h"
+#include "usuario.h"
+#include "jugador.h"
+#include "configuracionnivel.h"
 
-struct BloqueMovil {
-    int x, y;
-    int dx, dy; // dirección de movimiento: -1, 0 o 1 en cada eje
-    QGraphicsPixmapItem* sprite;
-};
+#include "bloquemovil.h"
 
 class MainWindow : public QMainWindow
 {
@@ -43,6 +42,7 @@ private:
     QGraphicsView *vistaJuego;
     QTimer *timerReloj;
     int segundosTranscurridos;
+    Jugador jugadorActual;
 
     QString familiaFuente;   // nombre real de la fuente Pixellari ya cargada
     QLineEdit *campoNombre;  // lo guardamos como miembro para validarlo desde el botón
@@ -76,6 +76,10 @@ private:
     QPushButton *btnSiguienteNivel;
     int nivelJugadoActual;
     QTimer *timerJuego;
+    QPushButton *btnNivel2;
+    QPushButton *btnNivel3;
+    QPushButton *btnSafari;
+    void actualizarBotonesNiveles();
     QLabel *lblValorPuntos;
     QLabel *lblValorVidas;
     QLabel *lblValorTiempo;
@@ -120,16 +124,14 @@ private:
     static const int INTERVALO_MINIMO_NIVEL2 = 90; // no dejar que se vuelva injugable
     void iniciarNivel3();
 
-
-
     QGraphicsPixmapItem *itemComida;
 
     GestorArchivos *gestorArchivos;
-    DatosJugador jugadorActual;
     QPixmap obtenerSpriteDireccional(QString rutaDerecha, QString rutaIzquierda, Direccion direccion);
     QWidget *paginaNiveles;
 
     void crearPaginaInicio();
+    void iniciarNivelConConfiguracion(ConfiguracionNivel &config);
     void crearPaginaUsername();
     void validarNombre();
     void crearPaginaMenuPrincipal();

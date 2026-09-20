@@ -185,18 +185,15 @@ void MainWindow::validarNombre()
 
     // READ: ¿este nombre ya existe?
     if (gestorArchivos->buscarJugadorPorNombre(nombre, jugadorActual)) {
-        qDebug() << "Bienvenido de vuelta:" << QString::fromStdString(jugadorActual.nombre)
-        << "| Puntaje máximo:" << jugadorActual.puntajeMaximo
-        << "| Nivel alcanzado:" << jugadorActual.nivelMaximoAlcanzado;
+        qDebug() << "Bienvenido de vuelta:" << QString::fromStdString(jugadorActual.getNombre())
+        << "| Puntaje máximo:" << jugadorActual.getPuntajeMaximo()
+        << "| Nivel alcanzado:" << jugadorActual.getNivelMaximoAlcanzado();
     } else {
         // CREATE: jugador nuevo, con valores en cero
-        jugadorActual.nombre = nombre;
-        jugadorActual.puntajeMaximo = 0;
-        jugadorActual.tiempoMaximo = 0;
-        jugadorActual.nivelMaximoAlcanzado = 1; // arranca con Nivel 1 desbloqueado
-
+        jugadorActual = Jugador(nombre);
         gestorArchivos->crearJugador(jugadorActual);
-        qDebug() << "Nuevo jugador creado:" << QString::fromStdString(jugadorActual.nombre);
+
+        qDebug() << "Nuevo jugador creado:" << QString::fromStdString(jugadorActual.getNombre());
     }
 
     stack->setCurrentWidget(paginaMenuPrincipal);
@@ -220,6 +217,7 @@ void MainWindow::crearPaginaMenuPrincipal()
     btnJugar->setStyleSheet("border: none; background: transparent;");
 
     connect(btnJugar, &QPushButton::clicked, this, [this](){
+        actualizarBotonesNiveles();
         stack->setCurrentWidget(paginaNiveles);
     });
 
@@ -461,6 +459,106 @@ void MainWindow::iniciarNivel(int columnas, int filas, int tamanoCelda,
     stack->setCurrentWidget(paginaJuego);
 }
 
+void MainWindow::iniciarNivelConConfiguracion(ConfiguracionNivel &config)
+{
+    nivelJugadoActual = config.getNivel();
+    modoInfinitoActual = config.getModoInfinito();
+    rutaCabezaD = config.getCabezaD();
+    rutaCabezaI = config.getCabezaI();
+    rutaColaD = config.getColaD();
+    rutaColaI = config.getColaI();
+    origenXCuadricula = config.getOrigenX();
+    origenYCuadricula = config.getOrigenY();
+    tamanoCeldaActual = config.getTamanoCelda();
+    metaFrutasNivel = config.getMetaFrutas();
+    frutasComidas = 0;
+    segundosTranscurridos = 0;
+    lblValorTiempo->setText("00:00");
+
+    if (cicloColoresNivel != nullptr) delete[] cicloColoresNivel;
+    cantidadColoresCiclo = config.getCantidadColores();
+    cicloColoresNivel = new QString[cantidadColoresCiclo];
+    for (int i = 0; i < cantidadColoresCiclo; i++) {
+        cicloColoresNivel[i] = config.getColoresCuerpo()[i];
+    }
+
+    if (rutasPowerUpVariantes != nullptr) { delete[] rutasPowerUpVariantes; delete[] tiposPowerUpVariantes; }
+    cantidadVariantesPowerUp = config.getCantidadPowerUps();
+    rutasPowerUpVariantes = new QString[cantidadVariantesPowerUp];
+    tiposPowerUpVariantes = new int[cantidadVariantesPowerUp];
+    for (int i = 0; i < cantidadVariantesPowerUp; i++) {
+        rutasPowerUpVariantes[i] = config.getRutasPowerUp()[i];
+        tiposPowerUpVariantes[i] = config.getTiposPowerUp()[i];
+    }
+    powerUpVisible = false;
+    contadorPowerUp = 0;
+    itemPowerUp = nullptr;
+    ranaVisible = false;
+    ralentizadoActivo = false;
+    contadorRalentizado = 0;
+
+    vidasRestantes = config.getVidasIniciales();
+    lblValorVidas->setText(config.getTieneVidas() ? QString::number(vidasRestantes) : "-");
+
+    tableroJuego.configurarNivel(config.getColumnas(), config.getFilas(), config.getTamanoCelda());
+    if (!modoInfinitoActual) {
+        tableroJuego.generarMurosPerimetro();
+    }
+    if (config.getGeneraBloquesInternos()) {
+        tableroJuego.generarBloquesInternos();
+    }
+
+    serpienteJuego.inicializar(config.getColumnas() / 2, config.getFilas() / 2);
+    comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
+
+    escenaJuego->clear();
+    QGraphicsPixmapItem *fondo = escenaJuego->addPixmap(QPixmap(config.getRutaFondo()));
+    fondo->setPos(0, 0);
+    dibujarGridPermanente(config.getColorGrid());
+    if (!config.getRutaMuro().isEmpty()) {
+        dibujarMuros(config.getRutaMuro());
+    }
+    fondo->setZValue(-1);
+
+    QPixmap pixmapComidaInicial(config.getRutaComida());
+    pixmapComidaInicial = pixmapComidaInicial.scaled(tamanoCeldaActual, tamanoCeldaActual, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    itemComida = escenaJuego->addPixmap(pixmapComidaInicial);
+    itemComida->setZValue(1);
+    itemComida->setPos(origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual,
+                       origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual);
+
+    segmentosVisuales = nullptr;
+    cantidadSegmentosVisuales = 0;
+    redibujarSerpiente();
+
+    lblValorPuntos->setGeometry(config.getRectPuntos());
+    lblValorVidas->setGeometry(config.getRectVidas());
+    lblValorTiempo->setGeometry(config.getRectTiempo());
+
+    QString colorHex = config.getColorTextoHUD().name();
+    lblValorPuntos->setStyleSheet(QString("color: %1; font-family: '%2'; font-size: %3px;")
+                                      .arg(colorHex, familiaFuente).arg(config.getFuentePuntos()));
+    lblValorVidas->setStyleSheet(QString("color: %1; font-family: '%2'; font-size: %3px;")
+                                     .arg(colorHex, familiaFuente).arg(config.getFuenteVidas()));
+    lblValorTiempo->setStyleSheet(QString("color: %1; font-family: '%2'; font-size: %3px;")
+                                      .arg(colorHex, familiaFuente).arg(config.getFuenteTiempo()));
+
+    lblValorPuntos->setText("0/" + QString::number(metaFrutasNivel));
+
+    actualizarIconosPausa(config.getIconoPausa(), config.getVolumenPlay(), config.getVolumenPause());
+    btnPausaJuego->setGeometry(740, 45, 40, 40);
+
+    timerReloj->start();
+    timerJuego->start(config.getIntervaloInicial());
+    vistaJuego->setFocus();
+
+    if (config.getTieneBloquesMoviles()) {
+        inicializarBloquesMoviles();
+    }
+
+    stack->setCurrentWidget(paginaJuego);
+}
+
 void MainWindow::redibujarSerpiente()
 {
     if (segmentosVisuales != nullptr) {
@@ -573,13 +671,10 @@ void MainWindow::actualizarJuego()
         if (frutasComidas >= metaFrutasNivel) {
             timerJuego->stop();
             timerReloj->stop();
-            bool esRecordNuevo = (frutasComidas > jugadorActual.puntajeMaximo);
-            if (frutasComidas > jugadorActual.puntajeMaximo) jugadorActual.puntajeMaximo = frutasComidas;
-            if (segundosTranscurridos > jugadorActual.tiempoMaximo) jugadorActual.tiempoMaximo = segundosTranscurridos;
-
-            if (nivelJugadoActual == 1 && jugadorActual.nivelMaximoAlcanzado < 2) jugadorActual.nivelMaximoAlcanzado = 2;
-            if (nivelJugadoActual == 2 && jugadorActual.nivelMaximoAlcanzado < 3) jugadorActual.nivelMaximoAlcanzado = 3;
-
+            bool esRecordNuevo = (frutasComidas > jugadorActual.getPuntajeMaximo());
+            jugadorActual.actualizarRecord(frutasComidas, segundosTranscurridos);
+            if (nivelJugadoActual == 1) jugadorActual.desbloquearNivel(2);
+            if (nivelJugadoActual == 2) jugadorActual.desbloquearNivel(3);
             gestorArchivos->actualizarJugador(jugadorActual);
             mostrarVictoria(nivelJugadoActual, frutasComidas, vidasRestantes, segundosTranscurridos, esRecordNuevo);
         }
@@ -685,7 +780,8 @@ void MainWindow::actualizarJuego()
         } else {
             if (serpienteJuego.consumirEscudo()) {
                 qDebug() << "¡Escudo absorbió el golpe!";
-            } else {
+                serpienteJuego.inicializar(tableroJuego.getColumnas() / 2, tableroJuego.getFilas() / 2); // <- agrega esta línea
+            }else {
                 QString razon = chocoConMuro ? "Chocaste contra un muro" : "Chocaste contigo mismo";
                 finalizarPartidaPorDerrota(razon);
                 return;
@@ -715,42 +811,34 @@ void MainWindow::crearPaginaNiveles()
     connect(btnNivel1, &QPushButton::clicked, this, &MainWindow::iniciarNivel1);
 
     // --- Botón Nivel 2 (requiere haber alcanzado nivel 2) ---
-    QPushButton *btnNivel2 = new QPushButton(paginaNiveles);
+    btnNivel2 = new QPushButton(paginaNiveles);
     btnNivel2->setIcon(QIcon(":/Recursos/nivel2boton.png"));
     btnNivel2->setIconSize(QSize(96, 96));
     btnNivel2->setGeometry(558, 172, 96, 96);
     btnNivel2->setFlat(true);
     btnNivel2->setStyleSheet("border: none; background: transparent;");
-
-    bool nivel2Desbloqueado = (jugadorActual.nivelMaximoAlcanzado >= 2);
-    btnNivel2->setEnabled(nivel2Desbloqueado);
-    if (nivel2Desbloqueado) {
-        connect(btnNivel2, &QPushButton::clicked, this, &MainWindow::iniciarNivel2);
-    }
+    connect(btnNivel2, &QPushButton::clicked, this, &MainWindow::iniciarNivel2);
 
     // --- Botón Nivel 3 (requiere haber alcanzado nivel 3) ---
-    QPushButton *btnNivel3 = new QPushButton(paginaNiveles);
+    btnNivel3 = new QPushButton(paginaNiveles);
     btnNivel3->setIcon(QIcon(":/Recursos/nivel3boton.png"));
     btnNivel3->setIconSize(QSize(96, 96));
     btnNivel3->setGeometry(157, 510, 96, 96);
     btnNivel3->setFlat(true);
     btnNivel3->setStyleSheet("border: none; background: transparent;");
 
-    bool nivel3Desbloqueado = (jugadorActual.nivelMaximoAlcanzado >= 3);
+    bool nivel3Desbloqueado = jugadorActual.tieneNivelDesbloqueado(3);
     btnNivel3->setEnabled(nivel3Desbloqueado);
-    if (nivel3Desbloqueado) {
-        connect(btnNivel3, &QPushButton::clicked, this, &MainWindow::iniciarNivel3);
-    }
-
+    connect(btnNivel3, &QPushButton::clicked, this, &MainWindow::iniciarNivel3);
     // --- Botón Safari (requiere al menos 1 serpiente capturada) ---
-    QPushButton *btnSafari = new QPushButton(paginaNiveles);
+    btnSafari = new QPushButton(paginaNiveles);
     btnSafari->setIcon(QIcon(":/Recursos/safariboton.png"));
     btnSafari->setIconSize(QSize(96, 96));
     btnSafari->setGeometry(557, 510, 96, 96);
     btnSafari->setFlat(true);
     btnSafari->setStyleSheet("border: none; background: transparent;");
 
-    bool safariDesbloqueado = (jugadorActual.nivelMaximoAlcanzado >= 2); // completó al menos Nivel 1
+    bool safariDesbloqueado = jugadorActual.tieneNivelDesbloqueado(2);
     btnSafari->setEnabled(safariDesbloqueado);
     if (safariDesbloqueado) {
         connect(btnSafari, &QPushButton::clicked, this, [this](){
@@ -780,10 +868,15 @@ void MainWindow::crearPaginaNiveles()
     connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
         btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
     });
-
+    actualizarBotonesNiveles();
     stack->addWidget(paginaNiveles);
 }
-
+void MainWindow::actualizarBotonesNiveles()
+{
+    btnNivel2->setEnabled(jugadorActual.tieneNivelDesbloqueado(2));
+    btnNivel3->setEnabled(jugadorActual.tieneNivelDesbloqueado(3));
+    btnSafari->setEnabled(jugadorActual.tieneNivelDesbloqueado(2));
+}
 QPixmap MainWindow::obtenerSpriteDireccional(QString rutaDerecha, QString rutaIzquierda, Direccion direccion)
 {
     switch (direccion) {
@@ -833,73 +926,23 @@ Direccion MainWindow::calcularDireccionEntreNodos(Nodo* desde, Nodo* hacia)
 
 void MainWindow::iniciarNivel1()
 {
-    modoInfinitoActual = true;
-    nivelJugadoActual = 1;
-    rutaCabezaD = ":/Recursos/BoaHead.png";
-    rutaCabezaI = ":/Recursos/BoaHeadLeft.png";
-    rutaColaD=":/Recursos/BoaColaLeft.png";
-    rutaColaI=":/Recursos/BoaCola.png";
-    if (cicloColoresNivel != nullptr) {
-        delete[] cicloColoresNivel;
-    }
-    if (rutasPowerUpVariantes != nullptr) { delete[] rutasPowerUpVariantes; delete[] tiposPowerUpVariantes; }
-    cantidadVariantesPowerUp = 1;
-    rutasPowerUpVariantes = new QString[1];
-    tiposPowerUpVariantes = new int[1];
-    rutasPowerUpVariantes[0] = ":/Recursos/RanaLvl1.png";
-    tiposPowerUpVariantes[0] = 0;
-    powerUpVisible = false;
-    contadorPowerUp = 0;
-    itemPowerUp = nullptr;
-    rutaSpritePowerUp = ":/Recursos/RanaLvl1.png";
-    tipoEfectoPowerUp = 0; // 0 = encoge (rana)
-    origenXCuadricula = 50;   // centrado exacto
-    origenYCuadricula = 115;  // confirmar con prueba de líneas rojas
-    tamanoCeldaActual = 50;
-    metaFrutasNivel = 10;
-    frutasComidas = 0;
-    vidasRestantes = 3;
-    lblValorVidas->setText("3");
-    segundosTranscurridos = 0;
-    lblValorTiempo->setText("00:00");
-    timerReloj->start();
-    cantidadColoresCiclo = 3;
-    cicloColoresNivel = new QString[3];
-    cicloColoresNivel[0] = ":/Recursos/NodoNegroLvl1.png";
-    cicloColoresNivel[1] = ":/Recursos/NodoAmarilloLvl1.png";
-    cicloColoresNivel[2] = ":/Recursos/NodoNaranjaLvl1.png";
+    ConfiguracionNivel config;
+    config.establecer(1, 14, 10, 50, 10, true, 150, 50, 115,
+                      ":/Recursos/nivel1background.png", ":/Recursos/Manzana.png",
+                      ":/Recursos/BoaHead.png", ":/Recursos/BoaHeadLeft.png",
+                      ":/Recursos/BoaColaLeft.png", ":/Recursos/BoaCola.png");
 
-    tableroJuego.configurarNivel(14, 10, 50);
+    QString colores[3] = { ":/Recursos/NodoNegroLvl1.png", ":/Recursos/NodoAmarilloLvl1.png", ":/Recursos/NodoNaranjaLvl1.png" };
+    config.establecerColoresCuerpo(colores, 3);
 
-    serpienteJuego.inicializar(7, 5); // centrado en la matriz (14/2, 10/2)
-    comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
+    QString rutasPU[1] = { ":/Recursos/RanaLvl1.png" };
+    int tiposPU[1] = { 0 };
+    config.establecerPowerUps(rutasPU, tiposPU, 1);
 
-    escenaJuego->clear();
+    config.establecerVidas(true, 3);
+    config.establecerColorGrid(QColor(143, 208, 53, 100));
 
-    QGraphicsPixmapItem *fondo = escenaJuego->addPixmap(QPixmap(":/Recursos/nivel1background.png"));
-    fondo->setPos(0, 0);
-    dibujarGridPermanente(QColor(143, 208, 53, 100));
-    fondo->setZValue(-1);
-
-    QPixmap pixmapComidaInicial(":/Recursos/Manzana.png");
-    pixmapComidaInicial = pixmapComidaInicial.scaled(tamanoCeldaActual, tamanoCeldaActual, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    itemComida = escenaJuego->addPixmap(pixmapComidaInicial);
-    itemComida->setZValue(1);
-    itemComida->setPos(
-        origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual,
-        origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual
-        );
-
-    segmentosVisuales = nullptr;
-    cantidadSegmentosVisuales = 0;
-    redibujarSerpiente();
-
-    lblValorPuntos->setText("0/10"); // formato nuevo, ya no es un número suelto
-
-    timerJuego->start(150);
-    vistaJuego->setFocus();
-
-    stack->setCurrentWidget(paginaJuego);
+    iniciarNivelConConfiguracion(config);
 }
 
 void MainWindow::dibujarMuros(QString rutaSpriteMuro)
@@ -919,88 +962,34 @@ void MainWindow::dibujarMuros(QString rutaSpriteMuro)
         }
     }
 }
-
-
 void MainWindow::iniciarNivel2()
 {
-    intervaloBaseNivel2=170;
-    nivelJugadoActual = 2;
-    modoInfinitoActual = false;
-    rutaCabezaD = ":/Recursos/CascabelHead.png";
-    rutaCabezaI = ":/Recursos/CascabelHeadLeft.png";
-    rutaColaD = ":/Recursos/CascabelColaLeft.png";
-    rutaColaI = ":/Recursos/CascabelCola.png";
+    intervaloBaseNivel2 = 170;
 
-    if (cicloColoresNivel != nullptr) delete[] cicloColoresNivel;
-    cantidadColoresCiclo = 1;
-    cicloColoresNivel = new QString[1];
-    cicloColoresNivel[0] = ":/Recursos/NodoLvl2.png";
+    ConfiguracionNivel config;
+    config.establecer(2, 17, 12, 45, 10, false, intervaloBaseNivel2, 11, 101,
+                      ":/Recursos/nivel2background.png", ":/Recursos/ManzanaLvl2.png",
+                      ":/Recursos/CascabelHead.png", ":/Recursos/CascabelHeadLeft.png",
+                      ":/Recursos/CascabelColaLeft.png", ":/Recursos/CascabelCola.png");
 
-    ranaVisible = false; powerUpVisible = false; contadorPowerUp = 0; itemPowerUp = nullptr;
-    ralentizadoActivo = false; contadorRalentizado = 0;
+    QString colores[1] = { ":/Recursos/NodoLvl2.png" };
+    config.establecerColoresCuerpo(colores, 1);
 
-    if (rutasPowerUpVariantes != nullptr) { delete[] rutasPowerUpVariantes; delete[] tiposPowerUpVariantes; }
-    cantidadVariantesPowerUp = 1;
-    rutasPowerUpVariantes = new QString[1];
-    tiposPowerUpVariantes = new int[1];
-    rutasPowerUpVariantes[0] = ":/Recursos/RatonLvl2.png";
-    tiposPowerUpVariantes[0] = 0;
-    rutaSpritePowerUp = ":/Recursos/RatonLvl2.png";
-    tipoEfectoPowerUp = 1;
+    QString rutasPU[1] = { ":/Recursos/RatonLvl2.png" };
+    int tiposPU[1] = { 1 };
+    config.establecerPowerUps(rutasPU, tiposPU, 1);
 
-    origenXCuadricula = 11;
-    origenYCuadricula = 101;
-    tamanoCeldaActual = 45;
-    metaFrutasNivel = 10;
-    frutasComidas = 0;
-    lblValorVidas->setText("-");
-    segundosTranscurridos = 0;
-    lblValorTiempo->setText("00:00");
-    timerReloj->start();
+    config.establecerVidas(false, 0);
+    config.establecerMuro(":/Recursos/RocaLvl2.png", true);
+    config.establecerColorGrid(QColor(255, 255, 255, 100));
+    config.establecerHUD(QColor(52, 16, 3),
+                         QRect(122, 39, 100, 40), QRect(302, 39, 60, 40), QRect(640, 40, 100, 40),
+                         25, 25, 25);
+    config.establecerIconosPausa(":/Recursos/PausaVolumenLvl2.png", ":/Recursos/PlayVolumenLvl2.png", ":/Recursos/PauseVolumenLvl2.png");
 
-    tableroJuego.configurarNivel(17, 12, 45); // <- cambiado (17 en vez de 16)
-    tableroJuego.generarMurosPerimetro();
-    tableroJuego.generarBloquesInternos(); // <- nueva línea
+    iniciarNivelConConfiguracion(config);
 
-    serpienteJuego.inicializar(8, 6);
-    comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
-
-    escenaJuego->clear();
-    QGraphicsPixmapItem *fondo = escenaJuego->addPixmap(QPixmap(":/Recursos/nivel2background.png"));
-    fondo->setPos(0, 0);
-    dibujarGridPermanente(QColor(255, 255, 255, 100));
-    dibujarMuros(":/Recursos/RocaLvl2.png"); // <- nueva línea
-    fondo->setZValue(-1);
-
-    QPixmap pixmapComidaInicial(":/Recursos/ManzanaLvl2.png");
-    pixmapComidaInicial = pixmapComidaInicial.scaled(tamanoCeldaActual, tamanoCeldaActual, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    itemComida = escenaJuego->addPixmap(pixmapComidaInicial);
-    itemComida->setZValue(1);
-    itemComida->setPos(
-        origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual,
-        origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual
-        );
-
-    segmentosVisuales = nullptr;
-    cantidadSegmentosVisuales = 0;
-    redibujarSerpiente();
-
-    lblValorPuntos->setGeometry(122, 39, 100, 40);
-    lblValorPuntos->setStyleSheet(QString("color: rgb(52,16,3); font-family: '%1'; font-size: 25px;").arg(familiaFuente));
-    lblValorPuntos->setText("0/10");
-
-    lblValorVidas->setGeometry(302, 39, 60, 40);
-    lblValorVidas->setStyleSheet(QString("color: rgb(52,16,3); font-family: '%1'; font-size: 25px;").arg(familiaFuente));
-
-    lblValorTiempo->setGeometry(640, 40, 100, 40);
-    lblValorTiempo->setStyleSheet(QString("color: rgb(52,16,3); font-family: '%1'; font-size: 25px;").arg(familiaFuente));
-
-    btnPausaJuego->setGeometry(740, 25, 40, 40);
-    actualizarIconosPausa(":/Recursos/PausaVolumenLvl2.png", ":/Recursos/PlayVolumenLvl2.png", ":/Recursos/PauseVolumenLvl2.png");
-
-    timerJuego->start(intervaloBaseNivel2);
-    vistaJuego->setFocus();
-    stack->setCurrentWidget(paginaJuego);
+    btnPausaJuego->setGeometry(740, 25, 40, 40); // única diferencia visual propia de este nivel
 }
 void MainWindow::inicializarBloquesMoviles()
 {
@@ -1008,140 +997,64 @@ void MainWindow::inicializarBloquesMoviles()
 
     for (int i = 0; i < CANTIDAD_BLOQUES_MOVILES; i++) {
         int x, y;
-        // Busca una posición libre lejos del centro (donde arranca la serpiente)
         do {
             x = 2 + rand() % (tableroJuego.getColumnas() - 4);
             y = 2 + rand() % (tableroJuego.getFilas() - 4);
         } while (tableroJuego.obtenerValor(y, x) == 1 || (abs(x - 9) < 3 && abs(y - 7) < 3));
 
-        bloquesMoviles[i].x = x;
-        bloquesMoviles[i].y = y;
-        bloquesMoviles[i].dx = (rand() % 2 == 0) ? 1 : -1;
-        bloquesMoviles[i].dy = (rand() % 2 == 0) ? 1 : -1;
+        int dx = (rand() % 2 == 0) ? 1 : -1;
+        int dy = (rand() % 2 == 0) ? 1 : -1;
 
-        tableroJuego.asignarValor(y, x, 1); // se marca como muro en la matriz lógica
+        tableroJuego.asignarValor(y, x, 1);
 
         QPixmap pixmapBloque(":/Recursos/RocaLvl3.png");
         pixmapBloque = pixmapBloque.scaled(tamanoCeldaActual, tamanoCeldaActual, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        bloquesMoviles[i].sprite = escenaJuego->addPixmap(pixmapBloque);
-        bloquesMoviles[i].sprite->setZValue(1);
-        bloquesMoviles[i].sprite->setPos(
-            origenXCuadricula + x * tamanoCeldaActual,
-            origenYCuadricula + y * tamanoCeldaActual
-            );
+        QGraphicsPixmapItem *sprite = escenaJuego->addPixmap(pixmapBloque);
+        sprite->setZValue(1);
+        sprite->setPos(origenXCuadricula + x * tamanoCeldaActual, origenYCuadricula + y * tamanoCeldaActual);
+
+        bloquesMoviles[i].inicializar(x, y, dx, dy, sprite);
     }
 }
 
 void MainWindow::moverBloquesMoviles()
 {
     for (int i = 0; i < CANTIDAD_BLOQUES_MOVILES; i++) {
-        // Libera la celda vieja en la matriz
-        tableroJuego.asignarValor(bloquesMoviles[i].y, bloquesMoviles[i].x, 0);
-
-        int nuevoX = bloquesMoviles[i].x + bloquesMoviles[i].dx;
-        int nuevoY = bloquesMoviles[i].y + bloquesMoviles[i].dy;
-
-        // Rebota si golpea el borde interior (deja 1 celda de margen contra el muro real)
-        if (nuevoX <= 1 || nuevoX >= tableroJuego.getColumnas() - 2) {
-            bloquesMoviles[i].dx *= -1;
-            nuevoX = bloquesMoviles[i].x + bloquesMoviles[i].dx;
-        }
-        if (nuevoY <= 1 || nuevoY >= tableroJuego.getFilas() - 2) {
-            bloquesMoviles[i].dy *= -1;
-            nuevoY = bloquesMoviles[i].y + bloquesMoviles[i].dy;
-        }
-
-        bloquesMoviles[i].x = nuevoX;
-        bloquesMoviles[i].y = nuevoY;
-
-        tableroJuego.asignarValor(nuevoY, nuevoX, 1); // vuelve a marcar como muro en la nueva posición
-
-        bloquesMoviles[i].sprite->setPos(
-            origenXCuadricula + nuevoX * tamanoCeldaActual,
-            origenYCuadricula + nuevoY * tamanoCeldaActual
+        tableroJuego.asignarValor(bloquesMoviles[i].getY(), bloquesMoviles[i].getX(), 0);
+        bloquesMoviles[i].mover(tableroJuego.getColumnas(), tableroJuego.getFilas());
+        tableroJuego.asignarValor(bloquesMoviles[i].getY(), bloquesMoviles[i].getX(), 1);
+        bloquesMoviles[i].getSprite()->setPos(
+            origenXCuadricula + bloquesMoviles[i].getX() * tamanoCeldaActual,
+            origenYCuadricula + bloquesMoviles[i].getY() * tamanoCeldaActual
             );
     }
 }
-
 void MainWindow::iniciarNivel3()
 {
-    nivelJugadoActual = 3;
-    modoInfinitoActual = false;
+    ConfiguracionNivel config;
+    config.establecer(3, 19, 14, 40, 10, false, 100, 12, 104,
+                      ":/Recursos/nivel3background.png", ":/Recursos/ManzanaLvl3.png",
+                      ":/Recursos/MarinaHead.png", ":/Recursos/MarinaHeadLeft.png",
+                      ":/Recursos/MarinaTailLeft.png", ":/Recursos/MarinaTail.png");
 
-    if (cicloColoresNivel != nullptr) delete[] cicloColoresNivel;
-    cantidadColoresCiclo = 2;
-    cicloColoresNivel = new QString[2];
-    cicloColoresNivel[0] = ":/Recursos/NodoAzulLvl3.png";
-    cicloColoresNivel[1] = ":/Recursos/NodoNegroLvl3.png";
+    QString colores[2] = { ":/Recursos/NodoAzulLvl3.png", ":/Recursos/NodoNegroLvl3.png" };
+    config.establecerColoresCuerpo(colores, 2);
 
-    rutaCabezaD = ":/Recursos/MarinaHead.png";
-    rutaCabezaI = ":/Recursos/MarinaHeadLeft.png";
-    rutaColaD = ":/Recursos/MarinaTailLeft.png";
-    rutaColaI = ":/Recursos/MarinaTail.png";
+    QString rutasPU[2] = { ":/Recursos/PezLvl3.png", ":/Recursos/PezGloboLvl3.png" };
+    int tiposPU[2] = { 2, 3 };
+    config.establecerPowerUps(rutasPU, tiposPU, 2);
 
-    ranaVisible = false; powerUpVisible = false; contadorPowerUp = 0; itemPowerUp = nullptr;
-    if (rutasPowerUpVariantes != nullptr) { delete[] rutasPowerUpVariantes; delete[] tiposPowerUpVariantes; }
-    cantidadVariantesPowerUp = 2;
-    rutasPowerUpVariantes = new QString[2];
-    tiposPowerUpVariantes = new int[2];
-    rutasPowerUpVariantes[0] = ":/Recursos/PezLvl3.png";       // pez payaso: escudo
-    tiposPowerUpVariantes[0] = 2;
-    rutasPowerUpVariantes[1] = ":/Recursos/PezGloboLvl3.png";  // pez globo: crece/encoge
-    tiposPowerUpVariantes[1] = 3;
-    origenXCuadricula = 12;
-    origenYCuadricula = 104;
-    tamanoCeldaActual = 40;
-    metaFrutasNivel = 10;
-    frutasComidas = 0;
-    lblValorVidas->setText("-");
-    segundosTranscurridos = 0;
-    lblValorTiempo->setText("00:00");
-    timerReloj->start();
+    config.establecerVidas(false, 0);
+    config.establecerMuro(":/Recursos/RocaLvl3.png", false);
+    config.establecerBloquesMoviles(true);
+    config.establecerColorGrid(QColor(255, 255, 255, 100));
+    config.establecerHUD(QColor(255, 255, 255),
+                         QRect(114, 40, 100, 40), QRect(275, 40, 60, 40), QRect(664, 41, 100, 40),
+                         29, 31, 25);
+    config.establecerIconosPausa(":/Recursos/PausaVolumenLvl3.png", ":/Recursos/PlayVolumenLvl3.png", ":/Recursos/PauseVolumenLvl3.png");
 
-    tableroJuego.configurarNivel(19, 14, 40);
-    tableroJuego.generarMurosPerimetro();
-
-    serpienteJuego.inicializar(9, 7);
-    comidaJuego.generarNuevaPosicion(tableroJuego, serpienteJuego);
-
-    escenaJuego->clear();
-    QGraphicsPixmapItem *fondo = escenaJuego->addPixmap(QPixmap(":/Recursos/nivel3background.png"));
-    fondo->setPos(0, 0);
-    dibujarGridPermanente(QColor(255, 255, 255, 100));
-    dibujarMuros(":/Recursos/RocaLvl3.png");
-    fondo->setZValue(-1);
-
-    QPixmap pixmapComidaInicial(":/Recursos/ManzanaLvl3.png");
-    pixmapComidaInicial = pixmapComidaInicial.scaled(tamanoCeldaActual, tamanoCeldaActual, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    itemComida = escenaJuego->addPixmap(pixmapComidaInicial);
-    itemComida->setZValue(1);
-    itemComida->setPos(
-        origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual,
-        origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual
-        );
-
-    segmentosVisuales = nullptr;
-    cantidadSegmentosVisuales = 0;
-    redibujarSerpiente();
-
-    lblValorPuntos->setGeometry(114, 40, 100, 40);
-    lblValorPuntos->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 29px;").arg(familiaFuente));
-    lblValorPuntos->setText("0/10");
-
-    lblValorVidas->setGeometry(275, 40, 60, 40);
-    lblValorVidas->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 31px;").arg(familiaFuente));
-
-    lblValorTiempo->setGeometry(664, 41, 100, 40);
-    lblValorTiempo->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 25px;").arg(familiaFuente));
-
-    actualizarIconosPausa(":/Recursos/PausaVolumenLvl3.png", ":/Recursos/PlayVolumenLvl3.png", ":/Recursos/PauseVolumenLvl3.png");
-
-    timerJuego->start(100);
-    vistaJuego->setFocus();
-    inicializarBloquesMoviles();
-    stack->setCurrentWidget(paginaJuego);
+    iniciarNivelConConfiguracion(config);
 }
-
 
 void MainWindow::crearPaginaVictoria()
 {
@@ -1305,9 +1218,7 @@ void MainWindow::finalizarPartidaPorDerrota(QString razon)
     timerJuego->stop();
     timerReloj->stop();
 
-    if (frutasComidas > jugadorActual.puntajeMaximo) {
-        jugadorActual.puntajeMaximo = frutasComidas;
-    }
+    jugadorActual.actualizarRecord(frutasComidas, segundosTranscurridos);
     gestorArchivos->actualizarJugador(jugadorActual);
 
     mostrarDerrota(nivelJugadoActual, razon, frutasComidas, segundosTranscurridos);
