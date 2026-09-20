@@ -742,6 +742,7 @@ void MainWindow::actualizarJuego()
             if (nivelJugadoActual == 1) jugadorActual.desbloquearNivel(2);
             if (nivelJugadoActual == 2) jugadorActual.desbloquearNivel(3);
             jugadorActual.registrarNivelCompletado(nivelJugadoActual);
+            jugadorActual.actualizarRecordNivel(nivelJugadoActual, segundosTranscurridos);
             gestorArchivos->actualizarJugador(jugadorActual);
             mostrarVictoria(nivelJugadoActual, frutasComidas, vidasRestantes, segundosTranscurridos, esRecordNuevo);
         }

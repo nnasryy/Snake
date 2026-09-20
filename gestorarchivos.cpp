@@ -49,6 +49,20 @@ void GestorArchivos::cargarDesdeArchivo()
             j.registrarNivelCompletado(completado);
 
             jugadores.push_back(j);
+            std::getline(ss, campo, '|');
+            int t1 = campo.empty() ? -1 : std::stoi(campo);
+            std::getline(ss, campo, '|');
+            int t2 = campo.empty() ? -1 : std::stoi(campo);
+            std::getline(ss, campo, '|');
+            int t3 = campo.empty() ? -1 : std::stoi(campo);
+            std::getline(ss, campo, '|');
+            int pSafari = campo.empty() ? 0 : std::stoi(campo);
+
+            if (t1 != -1) j.actualizarRecordNivel(1, t1);
+            if (t2 != -1) j.actualizarRecordNivel(2, t2);
+            if (t3 != -1) j.actualizarRecordNivel(3, t3);
+            j.actualizarRecordSafari(pSafari);
+
         } catch (...) {
             continue; // línea corrupta, la saltamos en vez de tronar la app
         }
@@ -121,4 +135,30 @@ std::vector<Jugador> GestorArchivos::obtenerTopJugadores(int cantidad)
     });
     if ((int)copia.size() > cantidad) copia.resize(cantidad);
     return copia;
+}
+
+std::vector<Jugador> GestorArchivos::obtenerRankingNivel(int nivel, int cantidad)
+{
+    std::vector<Jugador> completaron;
+    for (const auto &j : jugadores) {
+        if (j.haCompletadoNivelConTiempo(nivel)) completaron.push_back(j);
+    }
+    std::sort(completaron.begin(), completaron.end(), [nivel](const Jugador &a, const Jugador &b) {
+        return a.getTiempoNivel(nivel) < b.getTiempoNivel(nivel); // menor tiempo primero
+    });
+    if ((int)completaron.size() > cantidad) completaron.resize(cantidad);
+    return completaron;
+}
+
+std::vector<Jugador> GestorArchivos::obtenerRankingSafari(int cantidad)
+{
+    std::vector<Jugador> conPuntaje;
+    for (const auto &j : jugadores) {
+        if (j.getPuntajeSafari() > 0) conPuntaje.push_back(j);
+    }
+    std::sort(conPuntaje.begin(), conPuntaje.end(), [](const Jugador &a, const Jugador &b) {
+        return a.getPuntajeSafari() > b.getPuntajeSafari(); // mayor puntaje primero
+    });
+    if ((int)conPuntaje.size() > cantidad) conPuntaje.resize(cantidad);
+    return conPuntaje;
 }

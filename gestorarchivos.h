@@ -24,6 +24,8 @@ public:
     std::vector<Jugador> obtenerTopJugadores(int cantidad);
     bool actualizarJugador(Jugador datosActualizados);
     bool eliminarJugador(std::string nombre);
+    std::vector<Jugador> obtenerRankingNivel(int nivel, int cantidad);
+    std::vector<Jugador> obtenerRankingSafari(int cantidad);
 
 private:
     std::string ruta;
