@@ -37,6 +37,10 @@ MainWindow::MainWindow(QWidget *parent)
     stack = new QStackedWidget(this);
     setCentralWidget(stack);
 
+    // La música se crea ANTES que las páginas: los botones de volumen le preguntan su estado al construirse
+    musica = new GestorMusica(this);
+    musica->reproducir();
+
     crearPaginaInicio();
     crearPaginaUsername();
     crearPaginaMenuPrincipal();
@@ -86,20 +90,7 @@ void MainWindow::crearPaginaInicio()
     btnSalir->setStyleSheet("border: none; background: transparent;");
 
 
-    QPushButton *btnVolumen = new QPushButton(paginaInicio);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(74, 74));
-    btnVolumen->setGeometry(693, 83, 74, 74);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        if (activado)
-            btnVolumen->setIcon(QIcon(":/Recursos/PauseVolumen.png"));
-        else
-            btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaInicio, 693, 83, 74);
 
     connect(btnSalir, &QPushButton::clicked, qApp, &QApplication::quit);
     connect(btnJugar, &QPushButton::clicked, this, [this](){
@@ -183,16 +174,7 @@ void MainWindow::crearPaginaUsername()
     connect(campoContrasena, &QLineEdit::returnPressed, this, &MainWindow::validarNombre);
 
     // --- Botón de volumen (igual al resto de pantallas) ---
-    QPushButton *btnVolumen = new QPushButton(paginaUsername);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(74, 74));
-    btnVolumen->setGeometry(693, 83, 74, 74);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaUsername, 693, 83, 74);
 
     // --- Overlay de error (oculto por defecto) ---
     overlayErrorLogin = new QWidget(paginaUsername);
@@ -352,17 +334,7 @@ void MainWindow::crearPaginaMenuPrincipal()
         stack->setCurrentWidget(paginaUsername);
     });
 
-    QPushButton *btnVolumen = new QPushButton(paginaMenuPrincipal);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(74, 74));
-    btnVolumen->setGeometry(693, 83, 74, 74);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaMenuPrincipal, 693, 83, 74);
 
     stack->addWidget(paginaMenuPrincipal);
 }
@@ -423,14 +395,15 @@ void MainWindow::crearPaginaJuego()
     lblToastSafari->setVisible(false);
 
     btnToggleMusica = new QPushButton(overlayPausa);
-    btnToggleMusica->setCheckable(true);
     btnToggleMusica->setIconSize(QSize(45, 45));
-    btnToggleMusica->setGeometry(15, 5, 45, 45); // esquina superior derecha del overlay
+    btnToggleMusica->setGeometry(15, 5, 45, 45);
     btnToggleMusica->setFlat(true);
+    btnToggleMusica->setFocusPolicy(Qt::NoFocus);
     btnToggleMusica->setStyleSheet("border: none; background: transparent;");
-    btnToggleMusica->setIcon(QIcon(":/Recursos/PlayVolumenLvl2.png"));
-    connect(btnToggleMusica, &QPushButton::toggled, this, [this](bool activado){
-        btnToggleMusica->setIcon(QIcon(activado ? rutaVolumenPause : rutaVolumenPlay));
+    btnToggleMusica->setIcon(QIcon(":/Recursos/PlayVolumenLvl2.png")); // provisional; actualizarIconosPausa() lo corrige al iniciar cada nivel
+    connect(btnToggleMusica, &QPushButton::clicked, musica, &GestorMusica::alternar);
+    connect(musica, &GestorMusica::estadoCambio, this, [this](bool sonando){
+        btnToggleMusica->setIcon(QIcon(sonando ? rutaVolumenPause : rutaVolumenPlay));
     });
 
     QPushButton *btnReanudar = new QPushButton(overlayPausa);
@@ -494,7 +467,7 @@ void MainWindow::actualizarIconosPausa(QString iconoPausa, QString volumenPlay, 
     rutaVolumenPause = volumenPause;
 
     btnPausaJuego->setIcon(QIcon(rutaIconoPausa));
-    btnToggleMusica->setIcon(QIcon(btnToggleMusica->isChecked() ? rutaVolumenPause : rutaVolumenPlay));
+    btnToggleMusica->setIcon(QIcon(musica->estaSonando() ? rutaVolumenPause : rutaVolumenPlay));
 }
 
 
@@ -987,17 +960,7 @@ void MainWindow::crearPaginaNiveles()
         stack->setCurrentWidget(paginaMenuPrincipal);
     });
 
-    QPushButton *btnVolumen = new QPushButton(paginaNiveles);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(50, 50));
-    btnVolumen->setGeometry(741, 8, 50, 50);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaNiveles, 741, 8, 50);
     actualizarBotonesNiveles();
     stack->addWidget(paginaNiveles);
 }
@@ -1335,16 +1298,7 @@ connect(btnVolverSafari, &QPushButton::clicked, this, [this](){
 });
 
 // --- Botón de volumen ---
-QPushButton *btnVolumen = new QPushButton(paginaSafariSetup);
-btnVolumen->setCheckable(true);
-btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-btnVolumen->setIconSize(QSize(50, 50));
-btnVolumen->setGeometry(741, 8, 50, 50);
-btnVolumen->setFlat(true);
-btnVolumen->setStyleSheet("border: none; background: transparent;");
-connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-    btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-});
+crearBotonVolumen(paginaSafariSetup, 741, 8, 50);
 
 stack->addWidget(paginaSafariSetup);
 }
@@ -1526,16 +1480,7 @@ void MainWindow::crearPaginaVictoria()
         else if (nivelJugadoActual == 2) iniciarNivel3();
     });
 
-    QPushButton *btnVolumenVictoria = new QPushButton(paginaVictoria);
-    btnVolumenVictoria->setCheckable(true);
-    btnVolumenVictoria->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumenVictoria->setIconSize(QSize(74, 74));
-    btnVolumenVictoria->setGeometry(693, 83, 74, 74);
-    btnVolumenVictoria->setFlat(true);
-    btnVolumenVictoria->setStyleSheet("border: none; background: transparent;");
-    connect(btnVolumenVictoria, &QPushButton::toggled, this, [btnVolumenVictoria](bool activado){
-        btnVolumenVictoria->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaVictoria, 693, 83, 74);
 
     stack->addWidget(paginaVictoria);
 }
@@ -1744,16 +1689,7 @@ void MainWindow::crearPaginaRanking()
     });
 
     // --- Botón de volumen ---
-    QPushButton *btnVolumen = new QPushButton(paginaRanking);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(50, 50));
-    btnVolumen->setGeometry(741, 8, 50, 50);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaRanking, 741, 8, 50);
 
     // --- Popup de Reglas (centrado, arriba de la pantalla de records) ---
     paginaReglasRecords = new QWidget(paginaRanking);
@@ -1877,6 +1813,8 @@ void MainWindow::crearPaginaAlbums()
     connect(btnVolver, &QPushButton::clicked, this, [this](){
         stack->setCurrentWidget(paginaMenuPrincipal);
     });
+
+    crearBotonVolumen(paginaAlbums, 741, 8, 50);
 
     actualizarBotonesAlbums();
     stack->addWidget(paginaAlbums);
@@ -2035,16 +1973,7 @@ void MainWindow::crearPaginaOpciones()
     });
 
     // --- Volumen (misma posición y tamaño que en Niveles) ---
-    QPushButton *btnVolumen = new QPushButton(paginaOpciones);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(50, 50));
-    btnVolumen->setGeometry(741, 8, 50, 50);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaOpciones, 741, 8, 50);
 
     actualizarTeclasOpciones();
     stack->addWidget(paginaOpciones);
@@ -2108,16 +2037,7 @@ void MainWindow::crearPaginaInstruccionesNivel(int nivel)
         else stack->setCurrentWidget(paginaInstruccionesSafari);
     });
 
-    QPushButton *btnVolumen = new QPushButton(pagina);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(74, 74));
-    btnVolumen->setGeometry(717, 8, 74, 74);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(pagina, 717, 8, 74);
 
     paginaInstruccionesNivel[nivel - 1] = pagina;
     stack->addWidget(pagina);
@@ -2151,16 +2071,7 @@ void MainWindow::crearPaginaInstruccionesSafari()
         stack->setCurrentWidget(paginaInstruccionesNivel[0]); // cierra el ciclo, vuelve a Nivel 1
     });
 
-    QPushButton *btnVolumen = new QPushButton(paginaInstruccionesSafari);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(74, 74));
-    btnVolumen->setGeometry(717, 8, 74, 74);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaInstruccionesSafari, 717, 8, 74);
 
     stack->addWidget(paginaInstruccionesSafari);
 }
@@ -2205,16 +2116,7 @@ void MainWindow::crearPaginaPerdisteSafari()
         stack->setCurrentWidget(paginaMenuPrincipal);
     });
 
-    QPushButton *btnVolumen = new QPushButton(paginaPerdisteSafari);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(74, 74));
-    btnVolumen->setGeometry(693, 83, 74, 74);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaPerdisteSafari, 693, 83, 74);
 
     stack->addWidget(paginaPerdisteSafari);
 }
@@ -2237,16 +2139,7 @@ void MainWindow::crearPaginaGanasteSafari()
         stack->setCurrentWidget(paginaMenuPrincipal);
     });
 
-    QPushButton *btnVolumen = new QPushButton(paginaGanasteSafari);
-    btnVolumen->setCheckable(true);
-    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
-    btnVolumen->setIconSize(QSize(74, 74));
-    btnVolumen->setGeometry(693, 83, 74, 74);
-    btnVolumen->setFlat(true);
-    btnVolumen->setStyleSheet("border: none; background: transparent;");
-    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
-        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
-    });
+    crearBotonVolumen(paginaGanasteSafari, 693, 83, 74);
 
     stack->addWidget(paginaGanasteSafari);
 }
@@ -2269,4 +2162,23 @@ void MainWindow::mostrarPerdisteSafari(QString razon)
     lblTiempoPerdisteSafari->setText(QString("%1:%2").arg(minutos, 2, 10, QChar('0')).arg(segs, 2, 10, QChar('0')));
 
     stack->setCurrentWidget(paginaPerdisteSafari);
+}
+
+// Un solo lugar donde se crea el botón de música. Todas las pantallas lo usan.
+QPushButton* MainWindow::crearBotonVolumen(QWidget *padre, int x, int y, int lado)
+{
+    QPushButton *btn = new QPushButton(padre);
+    btn->setIconSize(QSize(lado, lado));
+    btn->setGeometry(x, y, lado, lado);
+    btn->setFlat(true);
+    btn->setFocusPolicy(Qt::NoFocus); // que no se robe las teclas del juego (espacio, flechas, WASD)
+    btn->setStyleSheet("border: none; background: transparent;");
+
+    auto actualizarIcono = [btn](bool sonando){
+        btn->setIcon(QIcon(sonando ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
+    };
+    actualizarIcono(musica->estaSonando());                      // estado actual al crearse
+    connect(btn, &QPushButton::clicked, musica, &GestorMusica::alternar);
+    connect(musica, &GestorMusica::estadoCambio, btn, actualizarIcono); // se mantiene sincronizado con los demás botones
+    return btn;
 }

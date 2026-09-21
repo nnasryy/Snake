@@ -1,4 +1,4 @@
-QT += widgets
+QT += widgets multimedia
 
 CONFIG += c++17
 
@@ -11,6 +11,7 @@ SOURCES += \
     comida.cpp \
     configuracionnivel.cpp \
     gestorarchivos.cpp \
+    gestormusica.cpp \
     jugador.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -24,6 +25,7 @@ HEADERS += \
     comida.h \
     configuracionnivel.h \
     gestorarchivos.h \
+    gestormusica.h \
     jugador.h \
     mainwindow.h \
     nodo.h \

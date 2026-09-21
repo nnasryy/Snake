@@ -28,6 +28,7 @@
 #include "configuracionnivel.h"
 
 #include "bloquemovil.h"
+#include "gestormusica.h"
 
 class MainWindow : public QMainWindow
 {
@@ -45,6 +46,8 @@ private:
     QPushButton *btnMostrarPassword;
     QWidget *overlayErrorLogin;
     QLabel *lblErrorLogin;
+    GestorMusica *musica;
+    QPushButton* crearBotonVolumen(QWidget *padre, int x, int y, int lado);
     void togglePassword();
     void mostrarErrorLogin(QString mensaje);
     QWidget *paginaMenuPrincipal;
