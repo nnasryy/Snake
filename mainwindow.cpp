@@ -988,7 +988,7 @@ void MainWindow::actualizarBotonesNiveles()
 {
     btnNivel2->setEnabled(jugadorActual.tieneNivelDesbloqueado(2));
     btnNivel3->setEnabled(jugadorActual.tieneNivelDesbloqueado(3));
-    btnSafari->setEnabled(jugadorActual.tieneNivelDesbloqueado(2));
+    btnSafari->setEnabled(jugadorActual.tieneNivelDesbloqueado(1));
 }
 QPixmap MainWindow::obtenerSpriteDireccional(QString rutaDerecha, QString rutaIzquierda, Direccion direccion)
 {
@@ -2007,7 +2007,7 @@ void MainWindow::crearPaginaInstruccionesNivel(int nivel)
     btnVolumen->setCheckable(true);
     btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
     btnVolumen->setIconSize(QSize(74, 74));
-    btnVolumen->setGeometry(693, 83, 74, 74);
+    btnVolumen->setGeometry(717, 8, 74, 74);
     btnVolumen->setFlat(true);
     btnVolumen->setStyleSheet("border: none; background: transparent;");
     connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
@@ -2050,7 +2050,7 @@ void MainWindow::crearPaginaInstruccionesSafari()
     btnVolumen->setCheckable(true);
     btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
     btnVolumen->setIconSize(QSize(74, 74));
-    btnVolumen->setGeometry(693, 50, 74, 74);
+    btnVolumen->setGeometry(717, 8, 74, 74);
     btnVolumen->setFlat(true);
     btnVolumen->setStyleSheet("border: none; background: transparent;");
     connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
