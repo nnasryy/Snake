@@ -955,8 +955,6 @@ void MainWindow::crearPaginaNiveles()
     connect(btnSafari, &QPushButton::clicked, this, [this](){
         qDebug() << "Botón Safari presionado";
         for (int i = 1; i <= 3; i++) {
-            QString estado = jugadorActual.haCompletadoNivel(i) ? "SinCandado" : "ConCandado";
-            btnSkinSafari[i]->setIcon(QIcon(QString(":/Recursos/AlbumNivel%1%2.png").arg(i).arg(estado)));
             btnSkinSafari[i]->setEnabled(jugadorActual.haCompletadoNivel(i));
         }
         stack->setCurrentWidget(paginaSafariSetup);
@@ -1192,40 +1190,71 @@ void MainWindow::crearPaginaSafariSetup()
     paginaSafariSetup = new QWidget();
 
     QLabel *fondo = new QLabel(paginaSafariSetup);
-    fondo->setPixmap(QPixmap(":/Recursos/SafariSetupBackground.png"));
+    fondo->setPixmap(QPixmap(":/Recursos/PantallaSafariSetup.png"));
     fondo->setGeometry(0, 0, 800, 700);
     fondo->lower();
 
-    // --- Selector de skin (4 opciones, exclusivas) ---
+    // --- Imágenes de las serpientes (solo visuales, no clicables) ---
+    const QString imagenesSkin[4] = {
+        ":/Recursos/SafariSerpiente1.png",
+        ":/Recursos/SafariSerpiente2.png",
+        ":/Recursos/SafariSerpiente3.png",
+        ":/Recursos/SafariSerpiente4.png"
+    };
+    const QPoint posImagenSkin[4] = {
+        QPoint(70, 179), QPoint(238, 179), QPoint(409, 179), QPoint(580, 179)
+    };
+    for (int i = 0; i < 4; i++) {
+        lblSkinSafari[i] = new QLabel(paginaSafariSetup);
+        lblSkinSafari[i]->setPixmap(
+            QPixmap(imagenesSkin[i]).scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+            );
+        lblSkinSafari[i]->setGeometry(posImagenSkin[i].x(), posImagenSkin[i].y(), 150, 150);
+    }
+
+    // --- Botones "select" de skin (4 opciones, exclusivas) ---
     grupoSkinSafari = new QButtonGroup(this);
     grupoSkinSafari->setExclusive(true);
-    const int posXSkin[4] = {40, 220, 400, 580};
+    const QPoint posSelectSkin[4] = {
+        QPoint(132, 339), QPoint(300, 339), QPoint(469, 339), QPoint(642, 339)
+    };
     for (int i = 0; i < 4; i++) {
         btnSkinSafari[i] = new QPushButton(paginaSafariSetup);
         btnSkinSafari[i]->setCheckable(true);
-        btnSkinSafari[i]->setIconSize(QSize(150, 150));
-        btnSkinSafari[i]->setGeometry(posXSkin[i], 90, 150, 150);
+        btnSkinSafari[i]->setGeometry(posSelectSkin[i].x(), posSelectSkin[i].y(), 25, 25);
         btnSkinSafari[i]->setStyleSheet(
-            "QPushButton { border: 4px solid transparent; background: transparent; }"
-            "QPushButton:checked { border: 4px solid rgb(143,208,53); }"
+            "QPushButton { background: rgb(15,58,13); border: 2px solid rgb(143,208,53); border-radius: 4px; }"
+            "QPushButton:checked { background: rgb(143,208,53); }"
+            "QPushButton:disabled { background: rgb(60,60,60); border-color: rgb(90,90,90); }"
             );
         grupoSkinSafari->addButton(btnSkinSafari[i], i); // id 0=Esmeralda,1=Boa,2=Cascabel,3=Marina
     }
-    btnSkinSafari[0]->setIcon(QIcon(":/Recursos/EsmeraldaHeadSafari.png"));
     btnSkinSafari[0]->setEnabled(true); // siempre disponible
     btnSkinSafari[0]->setChecked(true); // seleccionado por defecto
+
+    // Al seleccionar una serpiente, las demás se ponen en gris
+    auto actualizarGrisSkinSafari = [this](int idSeleccionado){
+        for (int i = 0; i < 4; i++) {
+            QGraphicsColorizeEffect *efecto = new QGraphicsColorizeEffect(lblSkinSafari[i]);
+            efecto->setColor(Qt::gray);
+            efecto->setStrength(i == idSeleccionado ? 0.0 : 1.0);
+            lblSkinSafari[i]->setGraphicsEffect(efecto);
+        }
+    };
+    connect(grupoSkinSafari, &QButtonGroup::idClicked, this, actualizarGrisSkinSafari);
+    actualizarGrisSkinSafari(0); // estado inicial
 
     // --- Selector de muros (2 opciones, exclusivas) ---
     grupoMurosSafari = new QButtonGroup(this);
     grupoMurosSafari->setExclusive(true);
-    QString textosMuros[2] = {"Atravesable", "Mortal"};
+    const QPoint posMuros[2] = { QPoint(418, 431), QPoint(589, 431) };
     for (int i = 0; i < 2; i++) {
-        btnMurosSafari[i] = new QPushButton(textosMuros[i], paginaSafariSetup);
+        btnMurosSafari[i] = new QPushButton(paginaSafariSetup);
         btnMurosSafari[i]->setCheckable(true);
-        btnMurosSafari[i]->setGeometry(100 + i * 300, 300, 250, 60);
+        btnMurosSafari[i]->setGeometry(posMuros[i].x(), posMuros[i].y(), 20, 20);
         btnMurosSafari[i]->setStyleSheet(
-            "QPushButton { background: rgb(15,58,13); color: white; border: 3px solid rgb(143,208,53); font-size: 18px; }"
-            "QPushButton:checked { background: rgb(143,208,53); color: black; }"
+            "QPushButton { background: rgb(15,58,13); border: 2px solid rgb(143,208,53); border-radius: 4px; }"
+            "QPushButton:checked { background: rgb(143,208,53); }"
             );
         grupoMurosSafari->addButton(btnMurosSafari[i], i); // 0=Atravesable, 1=Mortal
     }
@@ -1234,51 +1263,69 @@ void MainWindow::crearPaginaSafariSetup()
     // --- Selector de vidas (2 opciones, exclusivas) ---
     grupoVidasSafari = new QButtonGroup(this);
     grupoVidasSafari->setExclusive(true);
-    QString textosVidas[2] = {"Normal (3 vidas)", "Hardcore (1 vida)"};
+    const QPoint posVidas[2] = { QPoint(418, 511), QPoint(569, 511) };
     for (int i = 0; i < 2; i++) {
-        btnVidasSafari[i] = new QPushButton(textosVidas[i], paginaSafariSetup);
+        btnVidasSafari[i] = new QPushButton(paginaSafariSetup);
         btnVidasSafari[i]->setCheckable(true);
-        btnVidasSafari[i]->setGeometry(100 + i * 300, 390, 250, 60);
+        btnVidasSafari[i]->setGeometry(posVidas[i].x(), posVidas[i].y(), 20, 20);
         btnVidasSafari[i]->setStyleSheet(
-            "QPushButton { background: rgb(15,58,13); color: white; border: 3px solid rgb(143,208,53); font-size: 16px; }"
-            "QPushButton:checked { background: rgb(143,208,53); color: black; }"
+            "QPushButton { background: rgb(15,58,13); border: 2px solid rgb(143,208,53); border-radius: 4px; }"
+            "QPushButton:checked { background: rgb(143,208,53); }"
             );
         grupoVidasSafari->addButton(btnVidasSafari[i], i); // 0=Normal(3), 1=Hardcore(1)
     }
     btnVidasSafari[0]->setChecked(true);
 
     // --- Checkboxes de power-ups (selección múltiple) ---
-    QString nombresPowerUp[4] = {"Rana", "Ratón", "Pez payaso", "Pez globo"};
+    // orden fijo: 0=Rana, 1=Ratón, 2=Pez payaso, 3=Pez globo
+    const QPoint posPowerUp[4] = {
+        QPoint(107, 475), QPoint(107, 531), QPoint(250, 531), QPoint(250, 475)
+    };
     for (int i = 0; i < 4; i++) {
-        chkPowerUpSafari[i] = new QCheckBox(nombresPowerUp[i], paginaSafariSetup);
-        chkPowerUpSafari[i]->setGeometry(100 + (i % 2) * 300, 470 + (i / 2) * 40, 250, 30);
+        chkPowerUpSafari[i] = new QCheckBox(paginaSafariSetup);
+        chkPowerUpSafari[i]->setGeometry(posPowerUp[i].x(), posPowerUp[i].y(), 20, 20);
         chkPowerUpSafari[i]->setStyleSheet(
-            QString("color: white; font-family: '%1'; font-size: 16px;").arg(familiaFuente)
+            "QCheckBox::indicator { width: 20px; height: 20px; }"
+            "QCheckBox::indicator:unchecked { background: rgb(15,58,13); border: 2px solid rgb(143,208,53); border-radius: 4px; }"
+            "QCheckBox::indicator:checked { background: rgb(143,208,53); border: 2px solid rgb(143,208,53); border-radius: 4px; }"
             );
         chkPowerUpSafari[i]->setChecked(true); // todos activos por defecto
     }
 
-    // --- Botón Jugar ---
-    QPushButton *btnJugarSafari = new QPushButton("JUGAR", paginaSafariSetup);
-    btnJugarSafari->setGeometry(250, 570, 300, 70);
-    btnJugarSafari->setStyleSheet(
-        QString("background: rgb(143,208,53); color: black; font-size: 24px; font-family: '%1'; border-radius: 10px;").arg(familiaFuente)
-        );
+    // --- Botón Confirmar ---
+    QPushButton *btnJugarSafari = new QPushButton(paginaSafariSetup);
+    btnJugarSafari->setIcon(QIcon(":/Recursos/ConfirmarSafariSetup.png"));
+    btnJugarSafari->setIconSize(QSize(165, 42));
+    btnJugarSafari->setGeometry(469, 588, 165, 42);
+    btnJugarSafari->setFlat(true);
+    btnJugarSafari->setStyleSheet("border: none; background: transparent;");
     connect(btnJugarSafari, &QPushButton::clicked, this, [this](){
         int skin = grupoSkinSafari->checkedId();
         if (skin != 0 && !jugadorActual.haCompletadoNivel(skin)) return; // seguridad extra
         iniciarSafari();
     });
 
-    // --- Botón Volver ---
+    // --- Botón Salir ---
     QPushButton *btnVolverSafari = new QPushButton(paginaSafariSetup);
-    btnVolverSafari->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
-    btnVolverSafari->setIconSize(QSize(278, 70));
-    btnVolverSafari->setGeometry(261, 655, 278, 70);
+    btnVolverSafari->setIcon(QIcon(":/Recursos/SalirSafariSetup.png"));
+    btnVolverSafari->setIconSize(QSize(165, 42));
+    btnVolverSafari->setGeometry(161, 588, 165, 42);
     btnVolverSafari->setFlat(true);
     btnVolverSafari->setStyleSheet("border: none; background: transparent;");
     connect(btnVolverSafari, &QPushButton::clicked, this, [this](){
         stack->setCurrentWidget(paginaNiveles);
+    });
+
+    // --- Botón de volumen ---
+    QPushButton *btnVolumen = new QPushButton(paginaSafariSetup);
+    btnVolumen->setCheckable(true);
+    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
+    btnVolumen->setIconSize(QSize(50, 50));
+    btnVolumen->setGeometry(741, 8, 50, 50);
+    btnVolumen->setFlat(true);
+    btnVolumen->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
+        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
     });
 
     stack->addWidget(paginaSafariSetup);

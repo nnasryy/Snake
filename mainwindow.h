@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <QCheckBox>
 #include <QButtonGroup>
+#include <QGraphicsColorizeEffect>
 #include "gestorarchivos.h"
 #include "tablero.h"
 #include "serpiente.h"
@@ -128,6 +129,7 @@ private:
     QString rutaColaD;
     QString rutaColaI;
     QWidget *paginaSafariSetup;
+    QLabel *lblSkinSafari[4];
     QPushButton *btnSkinSafari[4];
     QButtonGroup *grupoSkinSafari;
     QPushButton *btnMurosSafari[2];
