@@ -10,8 +10,17 @@ GestorMusica::GestorMusica(QObject *parent)
 
     reproductor = new QMediaPlayer(this);
     reproductor->setAudioOutput(salida);
-    reproductor->setLoops(QMediaPlayer::Infinite); // repetir la canción sin fin
     reproductor->setSource(QUrl("qrc:/Recursos/musica.mp3"));
+
+    // Loop manual: setLoops(Infinite) falla con algunos mp3, así que al llegar
+    // al final volvemos al inicio nosotros mismos (solo si no está en pausa).
+    connect(reproductor, &QMediaPlayer::mediaStatusChanged, this,
+            [this](QMediaPlayer::MediaStatus estado){
+                if (estado == QMediaPlayer::EndOfMedia && sonando) {
+                    reproductor->setPosition(0);
+                    reproductor->play();
+                }
+            });
 
     connect(reproductor, &QMediaPlayer::errorOccurred, this,
             [](QMediaPlayer::Error, const QString &mensaje){
