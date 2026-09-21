@@ -192,6 +192,7 @@ private:
     void actualizarBotonesAlbums();    // cambia cada libro entre con/sin candado
     void abrirAlbum(int nivel);
     bool nivelCompletado(int nivel) const;
+    bool nodosDireccionales = false;
 
     QWidget *paginaRanking;
     QWidget *contenedorFilasRanking;
