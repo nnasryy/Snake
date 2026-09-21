@@ -24,6 +24,7 @@
 #include "usuario.h"
 #include "jugador.h"
 #include <QVBoxLayout>
+#include <QScrollArea>
 #include "configuracionnivel.h"
 
 #include "bloquemovil.h"
@@ -199,6 +200,8 @@ private:
     QVBoxLayout *layoutFilasRanking;
     QButtonGroup *grupoTabsRanking;
     QPushButton *btnTabRanking[4];
+    QWidget *paginaReglasRecords;
+    QPushButton *btnReglasRecords;
     void crearPaginaRanking();
     void mostrarRanking(int tab);
 

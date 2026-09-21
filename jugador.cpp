@@ -3,14 +3,13 @@
 
 Jugador::Jugador() : Usuario() // llama al constructor de la clase base
 {
-    for (int i = 0; i < 3; i++) tiempoPorNivel[i] = -1; // -1 = no completado aún
-    puntajeSafari = 0;
     puntajeMaximo = 0;
     tiempoMaximo = 0;
     nivelMaximoAlcanzado = 1;
     mejorNivelCompletado = 0;
     for (int i = 0; i < 3; i++) tiempoPorNivel[i] = -1; // -1 = no completado aún
     puntajeSafari = 0;
+    cantidadSafarisCompletados = 0;
 }
 
 Jugador::Jugador(std::string nombreInicial) : Usuario(nombreInicial)
@@ -19,6 +18,9 @@ Jugador::Jugador(std::string nombreInicial) : Usuario(nombreInicial)
     tiempoMaximo = 0;
     nivelMaximoAlcanzado = 1;
     mejorNivelCompletado = 0;
+    for (int i = 0; i < 3; i++) tiempoPorNivel[i] = -1; // -1 = no completado aún
+    puntajeSafari = 0;
+    cantidadSafarisCompletados = 0;
 }
 
 int Jugador::getPuntajeMaximo() const { return puntajeMaximo; }

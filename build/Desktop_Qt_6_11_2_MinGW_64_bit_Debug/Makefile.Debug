@@ -140,56 +140,90 @@ compiler_rcc_clean:
 	-$(DEL_FILE) debug\qrc_Recursos.cpp
 debug/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../../../Qt/6.11.2/mingw_64/bin/rcc.exe \
+		../../Recursos/SalirRecordsReglas.png \
 		../../Recursos/UsernameSalir.png \
-		../../Recursos/RanaLvl1.png \
 		../../Recursos/PantallaAlbum3.png \
-		../../Recursos/EsmeraldaColaLeftSafari.png \
 		../../Recursos/PantallaSafariSetup.png \
-		../../Recursos/PerdisteLvl2.png \
 		../../Recursos/VolverAMenuPJ.png \
 		../../Recursos/Manzana.png \
 		../../Recursos/ManzanaLvl2.png \
-		../../Recursos/MarinaHeadLeftSafari.png \
-		../../Recursos/BackgroundNiveles.png \
 		../../Recursos/MarinaTail.png \
 		../../Recursos/RatonLvl2.png \
 		../../Recursos/GanasteLvl3.png \
 		../../Recursos/CascabelHeadLeft.png \
-		../../Recursos/GanasteLvl2.png \
-		../../Recursos/InstruccionesNivel3.png \
-		../../Recursos/MarinaHeadLeft.png \
-		../../Recursos/InstruccionesNivel1.png \
 		../../Recursos/SafariSerpiente2.png \
-		../../Recursos/PantallaOpciones.png \
 		../../Recursos/MarinaTailLeft.png \
 		../../Recursos/Pixellari.ttf \
 		../../Recursos/PassOpenedOpciones.png \
 		../../Recursos/GanasteSafari.png \
 		../../Recursos/CascabelColaSafari.png \
-		../../Recursos/InstruccionesNivel2.png \
+		../../Recursos/PantallaRecords.png \
 		../../Recursos/nivel1boton.png \
 		../../Recursos/nivel1background.png \
 		../../Recursos/PlayVolumenLvl3.png \
-		../../Recursos/RocaLvl2.png \
 		../../Recursos/PauseVolumen.png \
 		../../Recursos/MenuInstrucciones.png \
+		../../Recursos/RocaLvl2.png \
 		../../Recursos/SnakeInicio.png \
-		../../Recursos/PauseVolumenLvl3.png \
-		../../Recursos/MarinaHead.png \
 		../../Recursos/UsernamePantalla.png \
-		../../Recursos/ManzanaLvl3.png \
 		../../Recursos/MenuOpciones.png \
-		../../Recursos/PassClosed.png \
 		../../Recursos/AlbumNivel3SinCandado.png \
 		../../Recursos/safariboton.png \
 		../../Recursos/PantallaAlbum1.png \
 		../../Recursos/AlbumNivel2SinCandado.png \
 		../../Recursos/SafariSerpiente3.png \
-		../../Recursos/PerdisteSafari.png \
-		../../Recursos/SeguirJugandoPJ.png \
-		../../Recursos/EsmeraldaHeadLeftSafari.png \
-		../../Recursos/MarinaColaSafari.png \
 		../../Recursos/PlayVolumen.png \
+		../../Recursos/Nivel1Records.png \
+		../../Recursos/WASD.png \
+		../../Recursos/SalirInstrucciones.png \
+		../../Recursos/PlayButton.png \
+		../../Recursos/CascabelColaLeft.png \
+		../../Recursos/nivel2boton.png \
+		../../Recursos/ReglasSafariRecords.png \
+		../../Recursos/NodoNaranjaLvl1.png \
+		../../Recursos/PantallaAlbums.png \
+		../../Recursos/AlbumNivel1ConCandado.png \
+		../../Recursos/VolverAMenu.png \
+		../../Recursos/MarinaHeadSafari.png \
+		../../Recursos/FLECHAS.png \
+		../../Recursos/PezPayasoSafari.png \
+		../../Recursos/RocaSafari.png \
+		../../Recursos/SafariBackground.png \
+		../../Recursos/NodoLvl2Safari.png \
+		../../Recursos/BoaCola.png \
+		../../Recursos/NodoAmarilloLvl1.png \
+		../../Recursos/NodoNegroLvl3Safari.png \
+		../../Recursos/AlbumNivel1SinCandado.png \
+		../../Recursos/CascabelCola.png \
+		../../Recursos/NodoAzulLvl3.png \
+		../../Recursos/Nivel3Records.png \
+		../../Recursos/Reintentar.png \
+		../../Recursos/MarinaColaLeftSafari.png \
+		../../Recursos/PerdisteLvl1.png \
+		../../Recursos/PauseVolumenLvl2.png \
+		../../Recursos/UsernameConfirmar.png \
+		../../Recursos/PlayVolumenLvl2.png \
+		../../Recursos/RanaLvl1.png \
+		../../Recursos/EsmeraldaColaLeftSafari.png \
+		../../Recursos/PerdisteLvl2.png \
+		../../Recursos/MarinaHeadLeftSafari.png \
+		../../Recursos/BackgroundNiveles.png \
+		../../Recursos/InstruccionesNivel3.png \
+		../../Recursos/GanasteLvl2.png \
+		../../Recursos/MarinaHeadLeft.png \
+		../../Recursos/InstruccionesNivel1.png \
+		../../Recursos/PantallaOpciones.png \
+		../../Recursos/InstruccionesNivel2.png \
+		../../Recursos/PauseVolumenLvl3.png \
+		../../Recursos/MarinaHead.png \
+		../../Recursos/ManzanaLvl3.png \
+		../../Recursos/PassClosed.png \
+		../../Recursos/SalirRecords.png \
+		../../Recursos/SeguirJugandoPJ.png \
+		../../Recursos/PerdisteSafari.png \
+		../../Recursos/EsmeraldaHeadLeftSafari.png \
+		../../Recursos/Nivel2Records.png \
+		../../Recursos/MarinaColaSafari.png \
 		../../Recursos/ManzanaSafari.png \
 		../../Recursos/VerEnAlbum.png \
 		../../Recursos/nivel2background.png \
@@ -200,18 +234,14 @@ debug/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/SalirSafariSetup.png \
 		../../Recursos/InstruccionesSafari.png \
 		../../Recursos/EsmeraldaNodoSafari.png \
-		../../Recursos/WASD.png \
 		../../Recursos/MenuJugar.png \
 		../../Recursos/PezLvl3.png \
 		../../Recursos/SafariSerpiente4.png \
-		../../Recursos/PlayButton.png \
 		../../Recursos/NodoAzulLvl3Safari.png \
 		../../Recursos/OpcionesSalir.png \
-		../../Recursos/SalirInstrucciones.png \
-		../../Recursos/CascabelColaLeft.png \
+		../../Recursos/SafariRecords.png \
 		../../Recursos/PassOpened.png \
 		../../Recursos/MenuPantalla.png \
-		../../Recursos/nivel2boton.png \
 		../../Recursos/GanasteLvl1.png \
 		../../Recursos/BoaHeadLeft.png \
 		../../Recursos/NodoLvl2.png \
@@ -221,46 +251,25 @@ debug/qrc_Recursos.cpp: ../../Recursos.qrc \
 		../../Recursos/EsmeraldaColaSafari.png \
 		../../Recursos/BoaHead.png \
 		../../Recursos/BoaColaLeft.png \
-		../../Recursos/NodoNaranjaLvl1.png \
 		../../Recursos/NodoNegroLvl3.png \
-		../../Recursos/PantallaAlbums.png \
-		../../Recursos/AlbumNivel1ConCandado.png \
-		../../Recursos/VolverAMenu.png \
-		../../Recursos/SiguienteNivel.png \
-		../../Recursos/RocaLvl3.png \
 		../../Recursos/CascabelHeadSafari.png \
 		../../Recursos/EsmeraldaHeadSafari.png \
-		../../Recursos/MenuRecords.png \
-		../../Recursos/MarinaHeadSafari.png \
+		../../Recursos/SiguienteNivel.png \
+		../../Recursos/RocaLvl3.png \
 		../../Recursos/CascabelColaLeftSafari.png \
-		../../Recursos/FLECHAS.png \
-		../../Recursos/PezPayasoSafari.png \
+		../../Recursos/ReglasRecords.png \
+		../../Recursos/MenuRecords.png \
 		../../Recursos/AlbumNivel3ConCandado.png \
 		../../Recursos/RatonSafari.png \
-		../../Recursos/SafariBackground.png \
-		../../Recursos/RocaSafari.png \
-		../../Recursos/NodoLvl2Safari.png \
-		../../Recursos/BoaCola.png \
-		../../Recursos/NodoAmarilloLvl1.png \
-		../../Recursos/NodoNegroLvl3Safari.png \
-		../../Recursos/AlbumNivel1SinCandado.png \
 		../../Recursos/MenuAlbum.png \
 		../../Recursos/AlbumNivel2ConCandado.png \
 		../../Recursos/SafariSerpiente1.png \
-		../../Recursos/CascabelCola.png \
-		../../Recursos/NodoAzulLvl3.png \
-		../../Recursos/Reintentar.png \
 		../../Recursos/nivel3boton.png \
 		../../Recursos/ConfirmarSafariSetup.png \
 		../../Recursos/NodoNegroLvl1.png \
-		../../Recursos/MarinaColaLeftSafari.png \
-		../../Recursos/PerdisteLvl1.png \
 		../../Recursos/PezGloboLvl3.png \
-		../../Recursos/PauseVolumenLvl2.png \
-		../../Recursos/UsernameConfirmar.png \
 		../../Recursos/CascabelHeadLeftSafari.png \
 		../../Recursos/PassClosedOpciones.png \
-		../../Recursos/PlayVolumenLvl2.png \
 		../../Recursos/nivel3background.png
 	C:\Qt\6.11.2\mingw_64\bin\rcc.exe -name Recursos --no-zstd ..\..\Recursos.qrc -o debug\qrc_Recursos.cpp
 
@@ -524,6 +533,7 @@ debug/moc_mainwindow.cpp: ../../mainwindow.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/qlayout.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/qlayoutitem.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/qgridlayout.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/QScrollArea \
 		../../configuracionnivel.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtGui/QColor \
 		../../bloquemovil.h \
@@ -1236,6 +1246,7 @@ debug/main.o: ../../main.cpp ../../mainwindow.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/qlayout.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/qlayoutitem.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/qgridlayout.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/QScrollArea \
 		../../configuracionnivel.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtGui/QColor \
 		../../bloquemovil.h \
@@ -1494,6 +1505,7 @@ debug/mainwindow.o: ../../mainwindow.cpp ../../mainwindow.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/qlayout.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/qlayoutitem.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/qgridlayout.h \
+		../../../../../../Qt/6.11.2/mingw_64/include/QtWidgets/QScrollArea \
 		../../configuracionnivel.h \
 		../../../../../../Qt/6.11.2/mingw_64/include/QtGui/QColor \
 		../../bloquemovil.h \

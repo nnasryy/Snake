@@ -48,7 +48,6 @@ void GestorArchivos::cargarDesdeArchivo()
             j.desbloquearNivel(nivel);
             j.registrarNivelCompletado(completado);
 
-            jugadores.push_back(j);
             std::getline(ss, campo, '|');
             int t1 = campo.empty() ? -1 : std::stoi(campo);
             std::getline(ss, campo, '|');
@@ -66,6 +65,8 @@ void GestorArchivos::cargarDesdeArchivo()
             if (t3 != -1) j.actualizarRecordNivel(3, t3);
             j.actualizarRecordSafari(pSafari);
 
+            jugadores.push_back(j);
+
         } catch (...) {
             continue; // línea corrupta, la saltamos en vez de tronar la app
         }
@@ -77,10 +78,14 @@ void GestorArchivos::guardarEnArchivo()
 {
     std::ofstream archivo(ruta, std::ios::trunc);
     for (const auto &j : jugadores) {
+        int t1 = j.getTiempoNivel(1);
+        int t2 = j.getTiempoNivel(2);
+        int t3 = j.getTiempoNivel(3);
         archivo << j.getNombre() << "|" << j.getPuntajeMaximo() << "|"
                 << j.getTiempoMaximo() << "|" << j.getNivelMaximoAlcanzado() << "|"
                 << j.getContrasena() << "|" << j.getMejorNivelCompletado() << "|"
-                << j.getCantidadSafarisCompletados() << std::endl;
+                << t1 << "|" << t2 << "|" << t3 << "|"
+                << j.getPuntajeSafari() << "|" << j.getCantidadSafarisCompletados() << std::endl;
 
     }
     archivo.close();

@@ -1661,40 +1661,120 @@ void MainWindow::crearPaginaRanking()
     paginaRanking = new QWidget();
 
     QLabel *fondo = new QLabel(paginaRanking);
-    fondo->setStyleSheet("background-color: rgb(15,58,13);"); // reemplaza por tu imagen cuando la tengas
+    fondo->setPixmap(QPixmap(":/Recursos/PantallaRecords.png"));
     fondo->setGeometry(0, 0, 800, 700);
     fondo->lower();
 
+    // --- Pestañas (Nivel 1, Nivel 2, Nivel 3, Safari) ---
     grupoTabsRanking = new QButtonGroup(this);
     grupoTabsRanking->setExclusive(true);
-    QString nombresTabs[4] = {"Nivel 1", "Nivel 2", "Nivel 3", "Safari"};
+    const QString iconosTabs[4] = {
+        ":/Recursos/Nivel1Records.png",
+        ":/Recursos/Nivel2Records.png",
+        ":/Recursos/Nivel3Records.png",
+        ":/Recursos/SafariRecords.png"
+    };
+    const QPoint posTabs[4] = {
+        QPoint(47, 204), QPoint(229, 204), QPoint(412, 204), QPoint(594, 204)
+    };
     for (int i = 0; i < 4; i++) {
-        btnTabRanking[i] = new QPushButton(nombresTabs[i], paginaRanking);
+        btnTabRanking[i] = new QPushButton(paginaRanking);
         btnTabRanking[i]->setCheckable(true);
-        btnTabRanking[i]->setGeometry(20 + i * 195, 20, 180, 50);
-        btnTabRanking[i]->setStyleSheet(
-            "QPushButton { background: rgb(15,58,13); color: white; border: 3px solid rgb(143,208,53); font-size: 16px; }"
-            "QPushButton:checked { background: rgb(143,208,53); color: black; }"
-            );
+        btnTabRanking[i]->setIcon(QIcon(iconosTabs[i]));
+        btnTabRanking[i]->setIconSize(QSize(157, 61));
+        btnTabRanking[i]->setGeometry(posTabs[i].x(), posTabs[i].y(), 157, 61);
+        btnTabRanking[i]->setFlat(true);
+        btnTabRanking[i]->setStyleSheet("border: none; background: transparent;");
         grupoTabsRanking->addButton(btnTabRanking[i], i);
-        connect(btnTabRanking[i], &QPushButton::clicked, this, [this, i](){ mostrarRanking(i); });
     }
     btnTabRanking[0]->setChecked(true);
 
-    contenedorFilasRanking = new QWidget(paginaRanking);
-    contenedorFilasRanking->setGeometry(50, 100, 700, 500);
+    // --- Botón Reglas (solo visible en la pestaña Safari) ---
+    btnReglasRecords = new QPushButton(paginaRanking);
+    btnReglasRecords->setIcon(QIcon(":/Recursos/ReglasRecords.png"));
+    btnReglasRecords->setIconSize(QSize(183, 43));
+    btnReglasRecords->setGeometry(602, 620, 183, 43);
+    btnReglasRecords->setFlat(true);
+    btnReglasRecords->setStyleSheet("border: none; background: transparent;");
+    connect(btnReglasRecords, &QPushButton::clicked, this, [this](){
+        paginaReglasRecords->raise();
+        paginaReglasRecords->show();
+    });
+
+    // Al seleccionar una pestaña, las demás se ponen en gris y el botón Reglas
+    // solo aparece en la pestaña Safari (id 3)
+    auto actualizarGrisTabs = [this](int idSeleccionado){
+        for (int i = 0; i < 4; i++) {
+            QGraphicsColorizeEffect *efecto = new QGraphicsColorizeEffect(btnTabRanking[i]);
+            efecto->setColor(Qt::gray);
+            efecto->setStrength(i == idSeleccionado ? 0.0 : 1.0);
+            btnTabRanking[i]->setGraphicsEffect(efecto);
+        }
+        btnReglasRecords->setVisible(idSeleccionado == 3);
+    };
+    connect(grupoTabsRanking, &QButtonGroup::idClicked, this, [this, actualizarGrisTabs](int id){
+        actualizarGrisTabs(id);
+        mostrarRanking(id);
+    });
+    actualizarGrisTabs(0);
+
+    // --- Panel de scroll con la lista de records ---
+    QScrollArea *scrollRanking = new QScrollArea(paginaRanking);
+    scrollRanking->setGeometry(47, 272, 704, 321);
+    scrollRanking->setWidgetResizable(true);
+    scrollRanking->setFrameShape(QFrame::NoFrame);
+    scrollRanking->setStyleSheet("background: transparent;");
+    scrollRanking->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    contenedorFilasRanking = new QWidget();
+    contenedorFilasRanking->setStyleSheet("background: transparent;");
     layoutFilasRanking = new QVBoxLayout(contenedorFilasRanking);
     layoutFilasRanking->setAlignment(Qt::AlignTop);
+    scrollRanking->setWidget(contenedorFilasRanking);
 
+    // --- Botón Salir (visible sin importar la pestaña seleccionada) ---
     QPushButton *btnVolverRanking = new QPushButton(paginaRanking);
-    btnVolverRanking->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
-    btnVolverRanking->setIconSize(QSize(278, 70));
-    btnVolverRanking->setGeometry(261, 615, 278, 70);
+    btnVolverRanking->setIcon(QIcon(":/Recursos/SalirRecords.png"));
+    btnVolverRanking->setIconSize(QSize(170, 42));
+    btnVolverRanking->setGeometry(29, 620, 170, 42);
     btnVolverRanking->setFlat(true);
     btnVolverRanking->setStyleSheet("border: none; background: transparent;");
     connect(btnVolverRanking, &QPushButton::clicked, this, [this](){
         stack->setCurrentWidget(paginaMenuPrincipal);
     });
+
+    // --- Botón de volumen ---
+    QPushButton *btnVolumen = new QPushButton(paginaRanking);
+    btnVolumen->setCheckable(true);
+    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
+    btnVolumen->setIconSize(QSize(50, 50));
+    btnVolumen->setGeometry(741, 8, 50, 50);
+    btnVolumen->setFlat(true);
+    btnVolumen->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
+        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
+    });
+
+    // --- Popup de Reglas (centrado, arriba de la pantalla de records) ---
+    paginaReglasRecords = new QWidget(paginaRanking);
+    paginaReglasRecords->setGeometry(25, 55, 750, 590);
+
+    QLabel *fondoReglas = new QLabel(paginaReglasRecords);
+    fondoReglas->setPixmap(QPixmap(":/Recursos/ReglasSafariRecords.png"));
+    fondoReglas->setGeometry(0, 0, 750, 590);
+    fondoReglas->lower();
+
+    QPushButton *btnSalirReglas = new QPushButton(paginaReglasRecords);
+    btnSalirReglas->setIcon(QIcon(":/Recursos/SalirRecordsReglas.png"));
+    btnSalirReglas->setIconSize(QSize(358, 91));
+    btnSalirReglas->setGeometry(221, 470, 358, 91);
+    btnSalirReglas->setFlat(true);
+    btnSalirReglas->setStyleSheet("border: none; background: transparent;");
+    connect(btnSalirReglas, &QPushButton::clicked, this, [this](){
+        paginaReglasRecords->hide();
+    });
+
+    paginaReglasRecords->hide();
 
     stack->addWidget(paginaRanking);
 }
@@ -1711,40 +1791,40 @@ void MainWindow::mostrarRanking(int tab)
         int nivel = tab + 1;
         std::vector<Jugador> ranking = gestorArchivos->obtenerRankingNivel(nivel, 10);
         for (int i = 0; i < (int)ranking.size(); i++) {
-            if (!ranking[i].haCompletadoNivel(nivel)) continue;
             int tiempo = ranking[i].getTiempoNivel(nivel);
-            if (tiempo <= 0) continue;
             int minutos = tiempo / 60;
             int segundos = tiempo % 60;
-            QString texto = QString("%1. %2 — %3:%4")
+            QString texto = QString("%1. %2 - %3:%4")
                                 .arg(i + 1)
                                 .arg(QString::fromStdString(ranking[i].getNombre()))
                                 .arg(minutos, 2, 10, QChar('0'))
                                 .arg(segundos, 2, 10, QChar('0'));
             QLabel *fila = new QLabel(texto, contenedorFilasRanking);
-            fila->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 20px;").arg(familiaFuente));
+            fila->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 25px; background: transparent;").arg(familiaFuente));
             layoutFilasRanking->addWidget(fila);
         }
         if (ranking.empty()) {
-            QLabel *vacio = new QLabel("Nadie ha completado este nivel todavía.", contenedorFilasRanking);
-            vacio->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 18px;").arg(familiaFuente));
+            QLabel *vacio = new QLabel("NADIE HA COMPLETADO ESTE NIVEL TODAVÍA.", contenedorFilasRanking);
+            vacio->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 25px; background: transparent;").arg(familiaFuente));
             layoutFilasRanking->addWidget(vacio);
         }
     } else {
         std::vector<Jugador> ranking = gestorArchivos->obtenerRankingSafari(10);
         for (int i = 0; i < (int)ranking.size(); i++) {
-            QString texto = QString("%1. %2 — %3 Modos Safari completados (%4)")
+            int cantidad = ranking[i].getCantidadSafarisCompletados();
+            QString etiqueta = (cantidad == 1) ? "SAFARI" : "SAFARIS";
+            QString texto = QString("%1. %2 - %3 %4")
                                 .arg(i + 1)
                                 .arg(QString::fromStdString(ranking[i].getNombre()))
-                                .arg(ranking[i].getCantidadSafarisCompletados())
-                                .arg(ranking[i].getMedallaSafari());
+                                .arg(cantidad)
+                                .arg(etiqueta);
             QLabel *fila = new QLabel(texto, contenedorFilasRanking);
-            fila->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 20px;").arg(familiaFuente));
+            fila->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 25px; background: transparent;").arg(familiaFuente));
             layoutFilasRanking->addWidget(fila);
         }
         if (ranking.empty()) {
-            QLabel *vacio = new QLabel("Nadie ha completado un Safari todavía.", contenedorFilasRanking);
-            vacio->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 18px;").arg(familiaFuente));
+            QLabel *vacio = new QLabel("NADIE HA COMPLETADO UN SAFARI TODAVÍA.", contenedorFilasRanking);
+            vacio->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 25px; background: transparent;").arg(familiaFuente));
             layoutFilasRanking->addWidget(vacio);
         }
     }
