@@ -11,7 +11,6 @@ public:
     ConfiguracionNivel();
     ~ConfiguracionNivel();
 
-    // Evita copias accidentales que causarían doble liberación de memoria
     ConfiguracionNivel(const ConfiguracionNivel&) = delete;
     ConfiguracionNivel& operator=(const ConfiguracionNivel&) = delete;
 

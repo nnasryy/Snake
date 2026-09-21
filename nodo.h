@@ -6,7 +6,7 @@ struct Nodo
 {
     int x;          // columna dentro de la matriz del Tablero
     int y;          // fila dentro de la matriz del Tablero
-    Nodo* siguiente; // apunta al próximo segmento (o nullptr si es el último)
+    Nodo* siguiente; // apunta al proximo segmento (o nullptr si es el ultimo)
 };
 
 #endif // NODO_H

@@ -31,13 +31,11 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug() << "No se pudo cargar Pixellari, usando fuente por defecto";
         familiaFuente = "Arial";
     }
-    //porque aqui es minuscula?
     gestorArchivos = new GestorArchivos("records.txt");
 
     stack = new QStackedWidget(this);
     setCentralWidget(stack);
 
-    // La música se crea ANTES que las páginas: los botones de volumen le preguntan su estado al construirse
     musica = new GestorMusica(this);
     musica->reproducir();
 
@@ -60,7 +58,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     resize(800, 700);
     setWindowTitle("Snake Avanzado");
-    qApp->installEventFilter(this); // captura las teclas de juego sin importar el foco
+    setWindowIcon(QIcon(":/SnakeLogo.ico"));
+    qApp->installEventFilter(this);
 }
 
 void MainWindow::crearPaginaInicio()
@@ -120,10 +119,8 @@ void MainWindow::crearPaginaUsername()
                               "}"
                               ).arg(familiaFuente);
 
-    // Solo letras y números, sin símbolos ni espacios
     QRegularExpression regexAlfanumerico("[A-Za-z0-9]*");
 
-    // --- Campo de usuario ---
     campoNombre = new QLineEdit(paginaUsername);
     campoNombre->setGeometry(70, 230, 591, 75);
     campoNombre->setAlignment(Qt::AlignCenter);

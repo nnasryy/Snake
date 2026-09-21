@@ -17,7 +17,7 @@ public:
     void setContrasena(std::string nuevaContrasena);
     bool verificarContrasena(std::string intento) const;
     static bool esContrasenaValida(std::string contrasena);
-    virtual void mostrarInfo() const; // virtual: Jugador la sobreescribe con "override"
+    virtual void mostrarInfo() const;
 
 protected:
     std::string nombre;

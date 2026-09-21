@@ -5,8 +5,7 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 
-// Única clase que sabe de audio. El resto del programa solo llama
-// reproducir() / pausar() / alternar() y escucha estadoCambio().
+
 class GestorMusica : public QObject
 {
     Q_OBJECT

@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+        <file alias="SnakeLogo.ico">SnakeLogo.ico</file>
         <file>Recursos/musica.mp3</file>
         <file>Recursos/PauseVolumen.png</file>
         <file>Recursos/PlayVolumen.png</file>

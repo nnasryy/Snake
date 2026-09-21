@@ -11,7 +11,6 @@ class Comida
 public:
     Comida();
 
-    // Busca una posición válida (sin chocar con muros ni con el cuerpo)
     void generarNuevaPosicion(Tablero &tablero, Serpiente &serpiente);
     void generarNuevaPosicionForzada(Tablero &tablero, Serpiente &serpiente, TipoComida tipoForzado);
 

@@ -6,14 +6,12 @@ GestorMusica::GestorMusica(QObject *parent)
     : QObject(parent), sonando(false)
 {
     salida = new QAudioOutput(this);
-    salida->setVolume(0.5f);                       // 0.0 a 1.0
+    salida->setVolume(0.5f);
 
     reproductor = new QMediaPlayer(this);
     reproductor->setAudioOutput(salida);
     reproductor->setSource(QUrl("qrc:/Recursos/musica.mp3"));
 
-    // Loop manual: setLoops(Infinite) falla con algunos mp3, así que al llegar
-    // al final volvemos al inicio nosotros mismos (solo si no está en pausa).
     connect(reproductor, &QMediaPlayer::mediaStatusChanged, this,
             [this](QMediaPlayer::MediaStatus estado){
                 if (estado == QMediaPlayer::EndOfMedia && sonando) {
@@ -44,7 +42,7 @@ void GestorMusica::reproducir()
 void GestorMusica::pausar()
 {
     if (!sonando) return;
-    reproductor->pause(); // pause() (no stop()) para continuar donde se quedó
+    reproductor->pause();
     sonando = false;
     emit estadoCambio(sonando);
 }

@@ -1,13 +1,13 @@
 #include "jugador.h"
 #include <iostream>
 
-Jugador::Jugador() : Usuario() // llama al constructor de la clase base
+Jugador::Jugador() : Usuario()
 {
     puntajeMaximo = 0;
     tiempoMaximo = 0;
     nivelMaximoAlcanzado = 1;
     mejorNivelCompletado = 0;
-    for (int i = 0; i < 3; i++) tiempoPorNivel[i] = -1; // -1 = no completado aún
+    for (int i = 0; i < 3; i++) tiempoPorNivel[i] = -1;
     puntajeSafari = 0;
     cantidadSafarisCompletados = 0;
 }
@@ -18,7 +18,7 @@ Jugador::Jugador(std::string nombreInicial) : Usuario(nombreInicial)
     tiempoMaximo = 0;
     nivelMaximoAlcanzado = 1;
     mejorNivelCompletado = 0;
-    for (int i = 0; i < 3; i++) tiempoPorNivel[i] = -1; // -1 = no completado aún
+    for (int i = 0; i < 3; i++) tiempoPorNivel[i] = -1;
     puntajeSafari = 0;
     cantidadSafarisCompletados = 0;
 }

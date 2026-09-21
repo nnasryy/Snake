@@ -39,7 +39,6 @@ void GestorArchivos::cargarDesdeArchivo()
             std::getline(ss, passLeida, '|');
             j.setContrasena(passLeida);
 
-            // campo nuevo: mejor nivel completado. Si el archivo es viejo (no existe), se deduce del nivel alcanzado
             int completado = 0;
             if (std::getline(ss, campo, '|') && !campo.empty()) completado = std::stoi(campo);
             if (nivel - 1 > completado) completado = nivel - 1;

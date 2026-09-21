@@ -20,7 +20,6 @@ void BloqueMovil::mover(int limiteColumnas, int limiteFilas)
     int nuevoX = x + dx;
     int nuevoY = y + dy;
 
-    // Rebota si toca el borde interior (deja 1 celda de margen contra el muro real)
     if (nuevoX <= 1 || nuevoX >= limiteColumnas - 2) {
         dx *= -1;
         nuevoX = x + dx;
