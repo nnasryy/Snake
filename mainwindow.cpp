@@ -49,7 +49,10 @@ MainWindow::MainWindow(QWidget *parent)
     crearPaginaSafariSetup();
     crearPaginaRanking();
     for (int nivel = 1; nivel <= 3; nivel++) crearPaginaAlbumNivel(nivel);
-
+    for (int nivel = 1; nivel <= 3; nivel++) crearPaginaInstruccionesNivel(nivel);
+    crearPaginaInstruccionesSafari();
+    crearPaginaGanasteSafari();
+    crearPaginaPerdisteSafari();
 
     resize(800, 700);
     setWindowTitle("Snake Avanzado");
@@ -299,10 +302,9 @@ void MainWindow::crearPaginaMenuPrincipal()
     btnInstrucciones->setFlat(true);
     btnInstrucciones->setStyleSheet("border: none; background: transparent;");
 
-    connect(btnInstrucciones, &QPushButton::clicked, this, [](){
-        qDebug() << "Botón Instrucciones presionado (pantalla pendiente)";
+    connect(btnInstrucciones, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaInstruccionesNivel[0]);
     });
-
 
     QPushButton *btnRecords = new QPushButton(paginaMenuPrincipal);
     btnRecords->setIcon(QIcon(":/Recursos/MenuRecords.png"));
@@ -423,7 +425,7 @@ void MainWindow::crearPaginaJuego()
     btnToggleMusica = new QPushButton(overlayPausa);
     btnToggleMusica->setCheckable(true);
     btnToggleMusica->setIconSize(QSize(45, 45));
-    btnToggleMusica->setGeometry(45, 5, 45, 45); // esquina superior derecha del overlay
+    btnToggleMusica->setGeometry(15, 5, 45, 45); // esquina superior derecha del overlay
     btnToggleMusica->setFlat(true);
     btnToggleMusica->setStyleSheet("border: none; background: transparent;");
     btnToggleMusica->setIcon(QIcon(":/Recursos/PlayVolumenLvl2.png"));
@@ -448,7 +450,8 @@ void MainWindow::crearPaginaJuego()
     connect(btnVolverMenu, &QPushButton::clicked, this, [this](){
         timerJuego->stop();
         timerReloj->stop();
-        ocultarPausa();
+        overlayPausa->setVisible(false); // oculta el overlay sin reiniciar los timers
+        modoSafariActivo = false; // por si venías de Safari, deja el estado limpio
         stack->setCurrentWidget(paginaMenuPrincipal);
     });
     // --- Timer del juego ---
@@ -769,7 +772,8 @@ void MainWindow::actualizarJuego()
             if (frutasComidas % 15 == 0) {
                 jugadorActual.registrarSafariCompletado();
                 gestorArchivos->actualizarJugador(jugadorActual);
-                mostrarToastSafari("¡Safari completado!\nTotal: " + QString::number(jugadorActual.getCantidadSafarisCompletados()));
+                mostrarGanasteSafari();
+                return; // corta el tick, ya cambiamos de pantalla
             }
         } else {
             if (nivelJugadoActual == 2 && frutasComidas % 2 == 0) {
@@ -1106,8 +1110,7 @@ void MainWindow::iniciarNivel2()
     config.establecerHUD(QColor(52, 16, 3),
                          QRect(122, 39, 100, 40), QRect(302, 39, 60, 40), QRect(640, 40, 100, 40),
                          25, 25, 25);
-    config.establecerIconosPausa(":/Recursos/PausaVolumenLvl2.png", ":/Recursos/PlayVolumenLvl2.png", ":/Recursos/PauseVolumenLvl2.png");
-
+    config.establecerIconosPausa(":/Recursos/PauseVolumenLvl2.png", ":/Recursos/PlayVolumenLvl2.png", ":/Recursos/PauseVolumenLvl2.png");
     iniciarNivelConConfiguracion(config);
 
     btnPausaJuego->setGeometry(740, 25, 40, 40); // única diferencia visual propia de este nivel
@@ -1181,8 +1184,7 @@ void MainWindow::iniciarNivel3()
     config.establecerHUD(QColor(255, 255, 255),
                          QRect(114, 40, 100, 40), QRect(275, 40, 60, 40), QRect(664, 41, 100, 40),
                          29, 31, 25);
-    config.establecerIconosPausa(":/Recursos/PausaVolumenLvl3.png", ":/Recursos/PlayVolumenLvl3.png", ":/Recursos/PauseVolumenLvl3.png");
-
+    config.establecerIconosPausa(":/Recursos/PauseVolumenLvl3.png", ":/Recursos/PlayVolumenLvl3.png", ":/Recursos/PauseVolumenLvl3.png");
     iniciarNivelConConfiguracion(config);
 }
 void MainWindow::crearPaginaSafariSetup()
@@ -1396,9 +1398,9 @@ void MainWindow::finalizarSafariPorDerrota()
 {
     timerJuego->stop();
     timerReloj->stop();
-     modoSafariActivo = false;
-    mostrarToastSafari("Te quedaste sin vidas.\nSafaris completados: " + QString::number(jugadorActual.getCantidadSafarisCompletados()));
-    QTimer::singleShot(2500, this, [this](){ stack->setCurrentWidget(paginaMenuPrincipal); });
+    modoSafariActivo = false;
+    gestorArchivos->actualizarJugador(jugadorActual);
+    mostrarPerdisteSafari("Te quedaste sin vidas");
 }
 void MainWindow::crearPaginaVictoria()
 {
@@ -1911,4 +1913,212 @@ void MainWindow::abrirOpciones()
     btnOpcionesPassword->setChecked(false); // siempre entra con la contraseña oculta
     actualizarTeclasOpciones();
     stack->setCurrentWidget(paginaOpciones);
+}
+void MainWindow::crearPaginaInstruccionesNivel(int nivel)
+{
+    QWidget *pagina = new QWidget();
+
+    QLabel *fondo = new QLabel(pagina);
+    fondo->setPixmap(QPixmap(QString(":/Recursos/InstruccionesNivel%1.png").arg(nivel)));
+    fondo->setGeometry(0, 0, 800, 700);
+    fondo->lower();
+
+    if (nivel == 1) {
+        QPushButton *btnSalir = new QPushButton(pagina);
+        btnSalir->setIcon(QIcon(":/Recursos/UsernameSalir.png"));
+        btnSalir->setIconSize(QSize(250, 63));
+        btnSalir->setGeometry(53, 607, 250, 63);
+        btnSalir->setFlat(true);
+        btnSalir->setStyleSheet("border: none; background: transparent;");
+        connect(btnSalir, &QPushButton::clicked, this, [this](){
+            stack->setCurrentWidget(paginaMenuPrincipal);
+        });
+    } else {
+        QPushButton *btnAnterior = new QPushButton(pagina);
+        btnAnterior->setIcon(QIcon(":/Recursos/SalirInstrucciones.png"));
+        btnAnterior->setIconSize(QSize(250, 63));
+        btnAnterior->setGeometry(53, 607, 250, 63);
+        btnAnterior->setFlat(true);
+        btnAnterior->setStyleSheet("border: none; background: transparent;");
+        connect(btnAnterior, &QPushButton::clicked, this, [this, nivel](){
+            stack->setCurrentWidget(paginaInstruccionesNivel[nivel - 2]); // nivel anterior
+        });
+    }
+
+    QPushButton *btnSiguiente = new QPushButton(pagina);
+    btnSiguiente->setIcon(QIcon(":/Recursos/SiguienteInstrucciones.png"));
+    btnSiguiente->setIconSize(QSize(250, 63));
+    btnSiguiente->setGeometry(497, 607, 250, 63);
+    btnSiguiente->setFlat(true);
+    btnSiguiente->setStyleSheet("border: none; background: transparent;");
+    connect(btnSiguiente, &QPushButton::clicked, this, [this, nivel](){
+        if (nivel < 3) stack->setCurrentWidget(paginaInstruccionesNivel[nivel]);
+        else stack->setCurrentWidget(paginaInstruccionesSafari);
+    });
+
+    QPushButton *btnVolumen = new QPushButton(pagina);
+    btnVolumen->setCheckable(true);
+    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
+    btnVolumen->setIconSize(QSize(74, 74));
+    btnVolumen->setGeometry(693, 83, 74, 74);
+    btnVolumen->setFlat(true);
+    btnVolumen->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
+        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
+    });
+
+    paginaInstruccionesNivel[nivel - 1] = pagina;
+    stack->addWidget(pagina);
+}
+void MainWindow::crearPaginaInstruccionesSafari()
+{
+    paginaInstruccionesSafari = new QWidget();
+
+    QLabel *fondo = new QLabel(paginaInstruccionesSafari);
+    fondo->setPixmap(QPixmap(":/Recursos/InstruccionesSafari.png"));
+    fondo->setGeometry(0, 0, 800, 700);
+    fondo->lower();
+
+    QPushButton *btnAnterior = new QPushButton(paginaInstruccionesSafari);
+    btnAnterior->setIcon(QIcon(":/Recursos/SalirInstrucciones.png"));
+    btnAnterior->setIconSize(QSize(250, 63));
+    btnAnterior->setGeometry(53, 607, 250, 63);
+    btnAnterior->setFlat(true);
+    btnAnterior->setStyleSheet("border: none; background: transparent;");
+    connect(btnAnterior, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaInstruccionesNivel[2]); // vuelve a Nivel 3
+    });
+
+    QPushButton *btnSiguiente = new QPushButton(paginaInstruccionesSafari);
+    btnSiguiente->setIcon(QIcon(":/Recursos/SiguienteInstrucciones.png"));
+    btnSiguiente->setIconSize(QSize(250, 63));
+    btnSiguiente->setGeometry(497, 607, 250, 63);
+    btnSiguiente->setFlat(true);
+    btnSiguiente->setStyleSheet("border: none; background: transparent;");
+    connect(btnSiguiente, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaInstruccionesNivel[0]); // cierra el ciclo, vuelve a Nivel 1
+    });
+
+    QPushButton *btnVolumen = new QPushButton(paginaInstruccionesSafari);
+    btnVolumen->setCheckable(true);
+    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
+    btnVolumen->setIconSize(QSize(74, 74));
+    btnVolumen->setGeometry(693, 50, 74, 74);
+    btnVolumen->setFlat(true);
+    btnVolumen->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
+        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
+    });
+
+    stack->addWidget(paginaInstruccionesSafari);
+}
+void MainWindow::crearPaginaPerdisteSafari()
+{
+    paginaPerdisteSafari = new QWidget();
+
+    QLabel *fondo = new QLabel(paginaPerdisteSafari);
+    fondo->setPixmap(QPixmap(":/Recursos/PerdisteSafari.png"));
+    fondo->setGeometry(0, 0, 800, 700);
+    fondo->lower();
+
+    lblRazonPerdisteSafari = new QLabel(paginaPerdisteSafari);
+    lblRazonPerdisteSafari->setGeometry(101, 324, 600, 40);
+    lblRazonPerdisteSafari->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 33px;").arg(familiaFuente));
+
+    lblManzanasPerdisteSafari = new QLabel(paginaPerdisteSafari);
+    lblManzanasPerdisteSafari->setGeometry(534, 53, 300, 50);
+    lblManzanasPerdisteSafari->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 40px;").arg(familiaFuente));
+
+    lblVidasPerdisteSafari = new QLabel(paginaPerdisteSafari);
+    lblVidasPerdisteSafari->setGeometry(101, 53, 300, 50);
+    lblVidasPerdisteSafari->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 40px;").arg(familiaFuente));
+
+    lblTiempoPerdisteSafari = new QLabel(paginaPerdisteSafari);
+    lblTiempoPerdisteSafari->setGeometry(534, 416, 200, 50);
+    lblTiempoPerdisteSafari->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 40px;").arg(familiaFuente));
+
+    QPushButton *btnReintentar = new QPushButton(paginaPerdisteSafari);
+    btnReintentar->setIcon(QIcon(":/Recursos/Reintentar.png"));
+    btnReintentar->setIconSize(QSize(218, 55));
+    btnReintentar->setGeometry(101, 554, 218, 55);
+    btnReintentar->setFlat(true);
+    btnReintentar->setStyleSheet("border: none; background: transparent;");
+    connect(btnReintentar, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaSafariSetup);
+    });
+
+    QPushButton *btnVolverMenu = new QPushButton(paginaPerdisteSafari);
+    btnVolverMenu->setIcon(QIcon(":/Recursos/VolverAMenu.png"));
+    btnVolverMenu->setIconSize(QSize(218, 55));
+    btnVolverMenu->setGeometry(463, 554, 218, 55);
+    btnVolverMenu->setFlat(true);
+    btnVolverMenu->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolverMenu, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaMenuPrincipal);
+    });
+
+    QPushButton *btnVolumen = new QPushButton(paginaPerdisteSafari);
+    btnVolumen->setCheckable(true);
+    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
+    btnVolumen->setIconSize(QSize(74, 74));
+    btnVolumen->setGeometry(693, 83, 74, 74);
+    btnVolumen->setFlat(true);
+    btnVolumen->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
+        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
+    });
+
+    stack->addWidget(paginaPerdisteSafari);
+}
+void MainWindow::crearPaginaGanasteSafari()
+{
+    paginaGanasteSafari = new QWidget();
+
+    QLabel *fondo = new QLabel(paginaGanasteSafari);
+    fondo->setPixmap(QPixmap(":/Recursos/GanasteSafari.png"));
+    fondo->setGeometry(0, 0, 800, 700);
+    fondo->lower();
+
+    QPushButton *btnVolverMenu = new QPushButton(paginaGanasteSafari);
+    btnVolverMenu->setIcon(QIcon(":/Recursos/VolverAMenu.png"));
+    btnVolverMenu->setIconSize(QSize(218, 55));
+    btnVolverMenu->setGeometry(291, 590, 218, 55);
+    btnVolverMenu->setFlat(true);
+    btnVolverMenu->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolverMenu, &QPushButton::clicked, this, [this](){
+        stack->setCurrentWidget(paginaMenuPrincipal);
+    });
+
+    QPushButton *btnVolumen = new QPushButton(paginaGanasteSafari);
+    btnVolumen->setCheckable(true);
+    btnVolumen->setIcon(QIcon(":/Recursos/PlayVolumen.png"));
+    btnVolumen->setIconSize(QSize(74, 74));
+    btnVolumen->setGeometry(693, 83, 74, 74);
+    btnVolumen->setFlat(true);
+    btnVolumen->setStyleSheet("border: none; background: transparent;");
+    connect(btnVolumen, &QPushButton::toggled, this, [btnVolumen](bool activado){
+        btnVolumen->setIcon(QIcon(activado ? ":/Recursos/PauseVolumen.png" : ":/Recursos/PlayVolumen.png"));
+    });
+
+    stack->addWidget(paginaGanasteSafari);
+}
+void MainWindow::mostrarGanasteSafari()
+{
+    timerJuego->stop();
+    timerReloj->stop();
+    modoSafariActivo = false;
+    stack->setCurrentWidget(paginaGanasteSafari);
+}
+
+void MainWindow::mostrarPerdisteSafari(QString razon)
+{
+    lblRazonPerdisteSafari->setText(razon);
+    lblManzanasPerdisteSafari->setText(QString::number(frutasComidas));
+    lblVidasPerdisteSafari->setText(QString::number(vidasRestantes));
+
+    int minutos = segundosTranscurridos / 60;
+    int segs = segundosTranscurridos % 60;
+    lblTiempoPerdisteSafari->setText(QString("%1:%2").arg(minutos, 2, 10, QChar('0')).arg(segs, 2, 10, QChar('0')));
+
+    stack->setCurrentWidget(paginaPerdisteSafari);
 }

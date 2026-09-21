@@ -107,5 +107,13 @@
         <file>Recursos/OpcionesSalir.png</file>
         <file>Recursos/WASD.png</file>
         <file>Recursos/FLECHAS.png</file>
+        <file>Recursos/InstruccionesNivel1.png</file>
+        <file>Recursos/InstruccionesNivel2.png</file>
+        <file>Recursos/InstruccionesNivel3.png</file>
+        <file>Recursos/InstruccionesSafari.png</file>
+        <file>Recursos/SalirInstrucciones.png</file>
+        <file>Recursos/SiguienteInstrucciones.png</file>
+        <file>Recursos/PerdisteSafari.png</file>
+        <file>Recursos/GanasteSafari.png</file>
     </qresource>
 </RCC>

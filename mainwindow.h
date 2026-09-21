@@ -143,13 +143,28 @@ private:
     int cantidadVariantesPowerUp = 0;    // velocidad "real" según el progreso, sin contar el power-up de ratón
     static const int INTERVALO_MINIMO_NIVEL2 = 90; // no dejar que se vuelva injugable
     void iniciarNivel3();
+    QWidget *paginaInstruccionesNivel[3];
+    QWidget *paginaInstruccionesSafari;
 
+    void crearPaginaInstruccionesNivel(int nivel);
+    void crearPaginaInstruccionesSafari();
     QGraphicsPixmapItem *itemComida;
 
     GestorArchivos *gestorArchivos;
     QPixmap obtenerSpriteDireccional(QString rutaDerecha, QString rutaIzquierda, Direccion direccion);
     QWidget *paginaNiveles;
+    QWidget *paginaGanasteSafari;
+    QWidget *paginaPerdisteSafari;
 
+    QLabel *lblRazonPerdisteSafari;
+    QLabel *lblManzanasPerdisteSafari;
+    QLabel *lblVidasPerdisteSafari;
+    QLabel *lblTiempoPerdisteSafari;
+
+    void crearPaginaGanasteSafari();
+    void crearPaginaPerdisteSafari();
+    void mostrarGanasteSafari();
+    void mostrarPerdisteSafari(QString razon);
     // --- Opciones ---
     QWidget *paginaOpciones;
     QLineEdit *campoOpcionesUsuario;
