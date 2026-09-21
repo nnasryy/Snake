@@ -1,0 +1,13 @@
+debug/bloquemovil.o
+debug/comida.o
+debug/configuracionnivel.o
+debug/gestorarchivos.o
+debug/jugador.o
+debug/main.o
+debug/mainwindow.o
+debug/nodo.o
+debug/serpiente.o
+debug/tablero.o
+debug/usuario.o
+debug/qrc_Recursos.o
+debug/moc_mainwindow.o

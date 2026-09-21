@@ -768,7 +768,7 @@ void MainWindow::actualizarJuego()
         itemComida->setPos(origenXCuadricula + comidaJuego.getX() * tamanoCeldaActual, origenYCuadricula + comidaJuego.getY() * tamanoCeldaActual);
 
         if (modoSafariActivo) {
-            lblValorPuntos->setText("Frutas: " + QString::number(frutasComidas));
+            lblValorPuntos->setText(QString::number(frutasComidas));
             if (frutasComidas % 15 == 0) {
                 jugadorActual.registrarSafariCompletado();
                 gestorArchivos->actualizarJugador(jugadorActual);
@@ -1421,12 +1421,19 @@ void MainWindow::iniciarSafari()
     cantidadSegmentosVisuales = 0;
     redibujarSerpiente();
 
-    lblValorPuntos->setGeometry(131, 59, 200, 40);
+    // --- HUD Safari: posiciones nuevas para manzanas, vidas y tiempo ---
+    lblValorPuntos->setGeometry(104, 22, 150, 40);
     lblValorPuntos->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 27px;").arg(familiaFuente));
-    lblValorPuntos->setText("Frutas: 0");
+    lblValorPuntos->setText("0");
+
+    lblValorVidas->setGeometry(273, 22, 100, 40);
+    lblValorVidas->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 27px;").arg(familiaFuente));
+
+    lblValorTiempo->setGeometry(650, 22, 100, 40);
+    lblValorTiempo->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 27px;").arg(familiaFuente));
 
     actualizarIconosPausa(":/Recursos/PauseVolumen.png", ":/Recursos/PlayVolumen.png", ":/Recursos/PauseVolumen.png");
-    btnPausaJuego->setGeometry(740, 45, 40, 40);
+    btnPausaJuego->setGeometry(740, 45, 40, 40); // siempre en la esquina, igual que en el resto de niveles
 
     timerReloj->start();
     timerJuego->start(150);
