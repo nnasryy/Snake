@@ -841,17 +841,20 @@ void MainWindow::actualizarJuego()
     }
 
     if (powerUpVisible && cabeza->x == powerUpJuego.getX() && cabeza->y == powerUpJuego.getY()) {
-
         if (tipoEfectoPowerUp == 0) { // Rana: encoge, o quita vida si ya está muy pequeña
             if (serpienteJuego.getLongitud() <= LONGITUD_MINIMA_SEGURA) {
                 vidasRestantes--;
                 lblValorVidas->setText(QString::number(vidasRestantes));
                 if (vidasRestantes <= 0) {
-                    finalizarPartidaPorDerrota("Te quedaste sin vidas comiendo ranas");
+                    if (modoSafariActivo) {
+                        finalizarSafariPorDerrota();
+                    } else {
+                        finalizarPartidaPorDerrota("Te quedaste sin vidas comiendo ranas");
+                    }
                     return;
                 }
             } else {
-                serpienteJuego.encoger(2);
+                serpienteJuego.encoger(1);
             }
         } else if (tipoEfectoPowerUp == 1) { //RATON DEL DESIERTO
             if (!ralentizadoActivo) {
@@ -866,13 +869,18 @@ void MainWindow::actualizarJuego()
             qDebug() << "¡Pez globo! Creciste 2 segmentos";
         } else if (tipoEfectoPowerUp == 2) { // PEZ PAYASO: quita 2 segmentos, o mata si ya no puede
             if (serpienteJuego.getLongitud() <= LONGITUD_MINIMA_SEGURA) {
-                finalizarPartidaPorDerrota("Te quedaste sin cuerpo suficiente");
+                if (modoSafariActivo) {
+                    finalizarSafariPorDerrota();
+                } else {
+                    finalizarPartidaPorDerrota("Te quedaste sin cuerpo suficiente");
+                }
                 return;
             } else {
                 serpienteJuego.encoger(2);
                 qDebug() << "¡Pez payaso! Perdiste 2 segmentos";
             }
         }
+
 
         escenaJuego->removeItem(itemPowerUp);
         delete itemPowerUp;
@@ -1569,7 +1577,7 @@ void MainWindow::crearPaginaDerrota()
     lblRazonDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 33px;").arg(familiaFuente));
 
     lblManzanasDerrota = new QLabel(paginaDerrota);
-    lblManzanasDerrota->setGeometry(534, 53, 300, 50);
+    lblManzanasDerrota->setGeometry(283, 416, 300, 50);
     lblManzanasDerrota->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 40px;").arg(familiaFuente));
 
     lblTiempoDerrota = new QLabel(paginaDerrota);
@@ -2090,12 +2098,8 @@ void MainWindow::crearPaginaPerdisteSafari()
     lblRazonPerdisteSafari->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 33px;").arg(familiaFuente));
 
     lblManzanasPerdisteSafari = new QLabel(paginaPerdisteSafari);
-    lblManzanasPerdisteSafari->setGeometry(534, 53, 300, 50);
+    lblManzanasPerdisteSafari->setGeometry(267, 416, 300, 50);
     lblManzanasPerdisteSafari->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 40px;").arg(familiaFuente));
-
-    lblVidasPerdisteSafari = new QLabel(paginaPerdisteSafari);
-    lblVidasPerdisteSafari->setGeometry(101, 53, 300, 50);
-    lblVidasPerdisteSafari->setStyleSheet(QString("color: white; font-family: '%1'; font-size: 40px;").arg(familiaFuente));
 
     lblTiempoPerdisteSafari = new QLabel(paginaPerdisteSafari);
     lblTiempoPerdisteSafari->setGeometry(534, 416, 200, 50);
@@ -2178,7 +2182,7 @@ void MainWindow::mostrarPerdisteSafari(QString razon)
 {
     lblRazonPerdisteSafari->setText(razon);
     lblManzanasPerdisteSafari->setText(QString::number(frutasComidas));
-    lblVidasPerdisteSafari->setText(QString::number(vidasRestantes));
+
 
     int minutos = segundosTranscurridos / 60;
     int segs = segundosTranscurridos % 60;
